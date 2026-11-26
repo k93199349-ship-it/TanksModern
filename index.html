@@ -586,6 +586,8 @@ let score = 0, wave = 0, waveTimer = 0, enemiesToSpawn = 0, spawnTimer = 0;
 let shakeAmount = 0, boosterActive = false;
 let sniper = false;
 let battleCredits = 0, battleXp = 0, battleKills = 0;
+let _trackGeo = null;
+let _battleEnv = null;
 let minimapCtx, hangar, sunLight, hemiLight;
 let garageCam = { orbit: 0, dist: 12, dragging: false, lastX: 0 };
 const groundRay = new THREE.Raycaster();
@@ -727,7 +729,7 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.06;
+  renderer.toneMappingExposure = 1.15;
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b0f14);
@@ -737,7 +739,7 @@ function init() {
 
   hemiLight = new THREE.HemisphereLight(0xbfd8e8, 0x3d4a35, 0.25);
   scene.add(hemiLight);
-  sunLight = new THREE.DirectionalLight(0xfff2d9, 1.4);
+  sunLight = new THREE.DirectionalLight(0xfff2d9, 1.6);
   sunLight.position.set(40, 60, 25);
   sunLight.visible = false;
   scene.add(sunLight);
@@ -1042,6 +1044,27 @@ function addRoads() {
   }
 }
 
+let _garageEnv = null;
+function garageEnv() {
+  if (_garageEnv) return _garageEnv;
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 64);
+  grad.addColorStop(0, '#3d4c5c');
+  grad.addColorStop(0.48, '#93a0ac');
+  grad.addColorStop(0.56, '#2c2620');
+  grad.addColorStop(1, '#15181c');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(c);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  _garageEnv = pmrem.fromEquirectangular(tex).texture;
+  pmrem.dispose();
+  return _garageEnv;
+}
+
 function makeInstanced(geo, mat, items, shadows) {
   const im = new THREE.InstancedMesh(geo, mat, Math.max(items.length, 1));
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(),
@@ -1161,7 +1184,7 @@ function addPond() {
   shore.receiveShadow = true;
   scene.add(shore);
   const water = new THREE.Mesh(new THREE.CircleGeometry(r, 26),
-    new THREE.MeshStandardMaterial({ color: 0x2e6284, transparent: true, opacity: 0.85, roughness: 0.15, metalness: 0.25 }));
+    new THREE.MeshStandardMaterial({ color: 0x2e6284, transparent: true, opacity: 0.85, roughness: 0.07, metalness: 0.5, envMapIntensity: 1.4 }));
   water.rotation.x = -Math.PI / 2;
   water.position.set(spot.x, 0.08, spot.z);
   scene.add(water);
@@ -1575,15 +1598,18 @@ function buildTankModel(cfg) {
     const tint = new THREE.Color(cfg.color || 0xffffff);
     const tintAmt = cfg.tint !== undefined ? cfg.tint : 0.15;
     const mkMat = (p, camo) => {
-      const m = new THREE.MeshStandardMaterial({
+      const m = new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(p.color[0], p.color[1], p.color[2]),
-        metalness: cfg.metal !== undefined ? (p.metal + cfg.metal) / 2 : p.metal,
+        metalness: Math.max(0.4, cfg.metal !== undefined ? (p.metal + cfg.metal) / 2 : p.metal),
         roughness: p.rough,
-        vertexColors: p.vc
+        vertexColors: p.vc,
+        envMapIntensity: 1.3,
+        clearcoat: 0.55,
+        clearcoatRoughness: 0.32
       });
       if (camo) {
         m.map = camoTexture(cfg.cls || '\u0421\u0422');
-        m.roughness = Math.min(0.95, p.rough + 0.18);
+        m.roughness = Math.min(0.9, p.rough + 0.15);
       } else if (tintAmt > 0) m.color.lerp(tint, tintAmt);
       return m;
     };
@@ -1686,7 +1712,9 @@ function createTank(cfg, isPlayer, team) {
     };
   }
 
-  const mat = new THREE.MeshStandardMaterial({ color: cfg.color, roughness: 0.55, metalness: cfg.metal !== undefined ? cfg.metal : 0.35 });
+  const mat = new THREE.MeshPhysicalMaterial({ color: cfg.color, roughness: 0.5,
+    metalness: Math.max(0.4, cfg.metal !== undefined ? cfg.metal : 0.35),
+    envMapIntensity: 1.25, clearcoat: 0.55, clearcoatRoughness: 0.32 });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x22282c, roughness: 0.8 });
   const trackMat = new THREE.MeshStandardMaterial({ color: 0x15181c, roughness: 0.95 });
 
@@ -2353,7 +2381,7 @@ function enterGarage() {
   sunLight.visible = false;
   hemiLight.intensity = 0.25;
   scene.fog = null;
-  scene.environment = null;
+  scene.environment = garageEnv();
   scene.background = new THREE.Color(0x0b0f14);
   rebuildTankPreview();
   switchTab('tanks');
@@ -2403,7 +2431,11 @@ function startGame() {
     skyTex.mapping = THREE.EquirectangularReflectionMapping;
     skyTex.wrapS = skyTex.wrapT = THREE.ClampToEdgeWrapping;
     scene.background = skyTex;
-    scene.environment = skyTex;
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    if (_battleEnv) _battleEnv.dispose();
+    _battleEnv = pmrem.fromEquirectangular(skyTex);
+    scene.environment = _battleEnv.texture;
+    pmrem.dispose();
   } else {
     scene.background = new THREE.Color(0x87a8bd);
   }
@@ -2637,6 +2669,21 @@ function updatePlayer(dt) {
     scene.add(dm);
     particles.push({ mesh: dm, kind: 'smoke',
       vel: new THREE.Vector3(rand(-0.5, 0.5), rand(0.6, 1.2), rand(-0.5, 0.5)), life: rand(0.6, 1.0), maxLife: 1.0 });
+  }
+
+  p.trackT = (p.trackT || 0) - dt;
+  if (Math.abs(vLong) > 2 && p.trackT <= 0 && particles.length < 340) {
+    p.trackT = 0.09;
+    if (!_trackGeo) _trackGeo = new THREE.CircleGeometry(0.36, 8);
+    const right = new THREE.Vector3(Math.cos(p.heading), 0, -Math.sin(p.heading));
+    for (const side of [-1, 1]) {
+      const tm = new THREE.Mesh(_trackGeo,
+        new THREE.MeshBasicMaterial({ color: 0x3a3227, transparent: true, opacity: 0.4, depthWrite: false }));
+      tm.rotation.x = -Math.PI / 2;
+      tm.position.copy(p.group.position).addScaledVector(right, side * 1.1).setY(0.06);
+      scene.add(tm);
+      particles.push({ mesh: tm, kind: 'track', vel: new THREE.Vector3(), life: 3.5, maxLife: 3.5 });
+    }
   }
 
   if (IS_TOUCH) {
@@ -2881,6 +2928,8 @@ function updateParticles(dt) {
       p.mesh.material.opacity = k * 0.55;
     } else if (p.kind === 'spark') {
       p.mesh.material.opacity = k * 0.8;
+    } else if (p.kind === 'track') {
+      p.mesh.material.opacity = Math.min(0.4, k * 0.5);
     }
     if (p.life <= 0) {
       scene.remove(p.mesh);
