@@ -8,83 +8,69 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e12; font-family: 'Segoe UI', Arial, sans-serif; }
   #game-canvas { display: block; width: 100%; height: 100%; }
-
-  #hud { position: fixed; inset: 0; pointer-events: none; color: #e8f0f5; }
-
+  #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.42) 100%); }
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #e8f0f5; z-index: 3; }
+  #hud.hidden { display: none; }
   .hud-top-left { position: absolute; top: 16px; left: 16px; }
   .hud-top-right { position: absolute; top: 16px; right: 16px; text-align: right; }
-  .hud-bottom-left { position: absolute; bottom: 16px; left: 16px; }
-
   .hp-wrap { width: 240px; }
   .hp-label { font-size: 12px; letter-spacing: 2px; color: #9fb3c0; margin-bottom: 4px; text-transform: uppercase; }
   .hp-bar { width: 100%; height: 14px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.25); border-radius: 3px; overflow: hidden; }
   .hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #37d67a, #2ecc71); transition: width .15s; }
   .hp-fill.medium { background: linear-gradient(90deg, #f5c542, #e6a817); }
   .hp-fill.low { background: linear-gradient(90deg, #ff5f5f, #e63946); }
-
   .stat { font-size: 15px; text-shadow: 0 1px 3px #000; margin-bottom: 4px; }
   .stat b { color: #ffd166; }
-  .wave-banner {
-    position: absolute; top: 18%; left: 50%; transform: translateX(-50%);
+  #booster-chip { display: none; color: #ffd166; font-weight: 700; }
+  .wave-banner { position: absolute; top: 18%; left: 50%; transform: translateX(-50%);
     font-size: 44px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase;
-    color: #ffd166; text-shadow: 0 2px 12px rgba(0,0,0,.8); opacity: 0; transition: opacity .4s;
-  }
-  #crosshair {
-    position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+    color: #ffd166; text-shadow: 0 2px 12px rgba(0,0,0,.8); opacity: 0; transition: opacity .4s; }
+  #crosshair { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px;
     border: 2px solid rgba(255,209,102,.9); border-radius: 50%;
-    box-shadow: 0 0 6px rgba(255,209,102,.6), inset 0 0 6px rgba(255,209,102,.4);
-    display: none;
-  }
-  #crosshair::before, #crosshair::after {
-    content: ''; position: absolute; background: rgba(255,209,102,.9);
-  }
+    box-shadow: 0 0 6px rgba(255,209,102,.6), inset 0 0 6px rgba(255,209,102,.4); display: none; }
+  #crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(255,209,102,.9); }
   #crosshair::before { left: 50%; top: -6px; width: 2px; height: 38px; margin-left: -1px; }
   #crosshair::after { top: 50%; left: -6px; height: 2px; width: 38px; margin-top: -1px; }
-
-  #minimap {
-    position: absolute; right: 16px; bottom: 16px;
-    width: 170px; height: 170px; border-radius: 6px;
-    background: rgba(5,10,14,.65); border: 1px solid rgba(255,255,255,.2);
-  }
+  #minimap { position: absolute; right: 16px; bottom: 16px; width: 170px; height: 170px; border-radius: 6px;
+    background: rgba(5,10,14,.65); border: 1px solid rgba(255,255,255,.2); }
   .reload-bar { width: 240px; height: 8px; margin-top: 6px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.25); border-radius: 3px; overflow: hidden; }
   .reload-fill { height: 100%; width: 100%; background: #6ec6ff; }
   .reload-label { font-size: 11px; letter-spacing: 2px; color: #9fb3c0; margin-top: 3px; text-transform: uppercase; }
-
-  .overlay {
-    position: fixed; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; text-align: center;
-    background: radial-gradient(ellipse at center, rgba(10,16,22,.88), rgba(5,8,12,.96));
-    color: #e8f0f5; z-index: 10;
-  }
+  .overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; background: radial-gradient(ellipse at center, rgba(10,16,22,.88), rgba(5,8,12,.96));
+    color: #e8f0f5; z-index: 10; }
   .overlay.hidden { display: none; }
   .title { font-size: 64px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; }
   .title .accent { color: #ffd166; }
   .subtitle { margin-top: 10px; font-size: 18px; color: #9fb3c0; max-width: 560px; line-height: 1.6; }
-  .controls { margin-top: 26px; display: grid; grid-template-columns: auto auto; gap: 8px 18px; font-size: 15px; color: #c6d4dd; text-align: left; }
-  .controls .key {
-    display: inline-block; padding: 2px 10px; border: 1px solid rgba(255,255,255,.35);
-    border-radius: 5px; background: rgba(255,255,255,.07); font-weight: 600; font-size: 13px;
-  }
-  .btn {
-    margin-top: 34px; padding: 14px 46px; font-size: 20px; font-weight: 700; letter-spacing: 2px;
+  .btn { margin-top: 34px; padding: 14px 46px; font-size: 20px; font-weight: 700; letter-spacing: 2px;
     text-transform: uppercase; color: #10151a; background: linear-gradient(180deg, #ffd166, #f2b705);
     border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 18px rgba(255,209,102,.35);
-    transition: transform .12s, box-shadow .12s; pointer-events: auto;
-  }
+    transition: transform .12s, box-shadow .12s; }
   .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,209,102,.5); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn.secondary { background: linear-gradient(180deg, #8fa3b0, #64798a); color: #0f1418; box-shadow: 0 4px 18px rgba(140,160,175,.25); }
+  .btn.small { margin-top: 0; padding: 8px 18px; font-size: 13px; }
   .final-score { margin-top: 14px; font-size: 24px; color: #ffd166; }
-  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #9fb3c0; font-size: 18px; letter-spacing: 3px; z-index: 20; }
-
-  #hud.hidden { display: none; }
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #9fb3c0; font-size: 18px; letter-spacing: 3px; z-index: 30; text-align: center; line-height: 1.8; }
   #garage { position: fixed; inset: 0; pointer-events: none; z-index: 5; color: #e8f0f5; display: none; }
   #garage.active { display: block; }
   .garage-top { position: absolute; top: 20px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
   .garage-title { font-size: 36px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
   .garage-title .accent { color: #ffd166; }
-  .garage-sub { font-size: 14px; color: #9fb3c0; margin-top: 4px; max-width: 420px; }
+  .garage-sub { font-size: 14px; color: #9fb3c0; margin-top: 4px; max-width: 460px; }
   .credits { font-size: 22px; font-weight: 700; color: #ffd166; text-shadow: 0 1px 4px #000; }
-  .tank-branch { position: absolute; bottom: 118px; left: 24px; right: 24px; display: flex; gap: 14px; justify-content: center; pointer-events: auto; }
-  .tank-card { width: 168px; padding: 12px; border-radius: 10px; background: rgba(8,14,20,.85); border: 2px solid rgba(255,255,255,.12); cursor: pointer; transition: border-color .15s, transform .15s; }
+  .garage-tabs { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; pointer-events: auto; }
+  .tab-btn { padding: 9px 22px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: #c6d4dd; background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; cursor: pointer; }
+  .tab-btn.active { color: #10151a; background: linear-gradient(180deg, #ffd166, #f2b705); border-color: transparent; }
+  .bottom-panel { position: absolute; bottom: 96px; left: 24px; right: 24px; display: none;
+    justify-content: center; gap: 14px; pointer-events: auto; flex-wrap: wrap; }
+  .bottom-panel.active { display: flex; }
+  .tank-card { width: 168px; padding: 12px; border-radius: 10px; background: rgba(8,14,20,.88);
+    border: 2px solid rgba(255,255,255,.12); cursor: pointer; transition: border-color .15s, transform .15s; }
   .tank-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.35); }
   .tank-card.selected { border-color: #ffd166; box-shadow: 0 0 18px rgba(255,209,102,.35); }
   .tank-card.locked { opacity: .72; }
@@ -92,23 +78,40 @@
   .tank-name { font-size: 18px; font-weight: 800; margin: 2px 0 6px; }
   .tank-cost { font-size: 13px; color: #ffd166; }
   .tank-cost.owned { color: #37d67a; }
-  .stat-panel { position: absolute; top: 110px; right: 24px; width: 265px; background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.15); border-radius: 10px; padding: 14px 16px; }
+  .container-card { width: 190px; padding: 14px; border-radius: 10px; background: rgba(8,14,20,.88);
+    border: 2px solid rgba(255,255,255,.12); text-align: center; }
+  .container-card .box-icon { font-size: 44px; }
+  .container-card .c-name { font-size: 17px; font-weight: 800; margin: 6px 0 4px; }
+  .container-card .c-desc { font-size: 12px; color: #9fb3c0; line-height: 1.5; min-height: 52px; }
+  .skin-card { width: 150px; padding: 12px; border-radius: 10px; background: rgba(8,14,20,.88);
+    border: 2px solid rgba(255,255,255,.12); text-align: center; }
+  .skin-swatch { width: 100%; height: 44px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,.25); }
+  .skin-rarity { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9fb3c0; }
+  .skin-rarity.rare { color: #6ec6ff; }
+  .skin-rarity.epic { color: #c792ea; }
+  .stat-panel { position: absolute; top: 110px; right: 24px; width: 265px; background: rgba(8,14,20,.85);
+    border: 1px solid rgba(255,255,255,.15); border-radius: 10px; padding: 14px 16px; }
+  .stat-panel.hidden { display: none; }
   .stat-row { margin-bottom: 10px; }
   .stat-name { font-size: 12px; color: #9fb3c0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; }
   .stat-bar { height: 8px; background: rgba(0,0,0,.6); border-radius: 4px; overflow: hidden; }
   .stat-bar div { height: 100%; background: linear-gradient(90deg,#6ec6ff,#3b82f6); border-radius: 4px; }
   .tank-desc { font-size: 13px; color: #c6d4dd; margin-top: 4px; line-height: 1.5; }
-  .garage-actions { position: absolute; bottom: 28px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; pointer-events: auto; }
-  .hint-rotate { position: absolute; bottom: 96px; left: 0; right: 0; text-align: center; font-size: 12px; color: #9fb3c0; letter-spacing: 2px; text-transform: uppercase; }
-  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn.secondary { background: linear-gradient(180deg, #8fa3b0, #64798a); color: #0f1418; box-shadow: 0 4px 18px rgba(140,160,175,.25); }
+  .garage-actions { position: absolute; bottom: 24px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; pointer-events: auto; }
+  .hint-rotate { position: absolute; bottom: 72px; left: 0; right: 0; text-align: center; font-size: 12px; color: #9fb3c0; letter-spacing: 2px; text-transform: uppercase; }
+  #loot-overlay { z-index: 15; }
+  .loot-box { font-size: 96px; line-height: 1.2; animation: lootShake .55s infinite; filter: drop-shadow(0 8px 30px rgba(255,209,102,.4)); }
+  @keyframes lootShake { 0%, 100% { transform: rotate(-7deg) scale(1); } 50% { transform: rotate(7deg) scale(1.12); } }
+  .loot-reward { font-size: 84px; line-height: 1.2; animation: lootPop .4s ease-out; }
+  @keyframes lootPop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
 <canvas id="game-canvas"></canvas>
+<div id="vignette"></div>
 <div id="loading">ЗАГРУЗКА...</div>
 
-<div id="hud">
+<div id="hud" class="hidden">
   <div class="hud-top-left">
     <div class="hp-label">Броня</div>
     <div class="hp-bar"><div class="hp-fill" id="hp-fill"></div></div>
@@ -119,6 +122,7 @@
     <div class="stat">Счёт: <b id="score">0</b></div>
     <div class="stat">Волна: <b id="wave">1</b></div>
     <div class="stat">Врагов: <b id="enemies">0</b></div>
+    <div class="stat" id="booster-chip">⚡ Кредиты ×2 активны</div>
   </div>
   <div class="wave-banner" id="wave-banner">Волна 1</div>
   <div id="crosshair"></div>
@@ -129,17 +133,30 @@
   <div class="garage-top">
     <div>
       <div class="garage-title">MODERN <span class="accent">TANKS</span></div>
-      <div class="garage-sub">Ангар: выбирай танк в ветке прокачки. Кредиты (⬤) зарабатывай в бою — за уничтоженные танки и волны. Прогресс сохраняется.</div>
+      <div class="garage-sub">Кредиты (⬤) зарабатываются в бою. Открывай контейнеры в магазине, надевай камуфляжи из хранилища.</div>
     </div>
     <div class="credits" id="credits-display">⬤ 0</div>
   </div>
+  <div class="garage-tabs">
+    <button class="tab-btn active" id="tab-tanks">Танки</button>
+    <button class="tab-btn" id="tab-shop">Магазин</button>
+    <button class="tab-btn" id="tab-storage">Хранилище</button>
+  </div>
   <div class="stat-panel" id="stat-panel"></div>
-  <div class="hint-rotate">Витрина — камера вращается вокруг танка</div>
-  <div class="tank-branch" id="tank-branch"></div>
+  <div class="bottom-panel active" id="panel-tanks"></div>
+  <div class="bottom-panel" id="panel-shop"></div>
+  <div class="bottom-panel" id="panel-storage"></div>
+  <div class="hint-rotate" id="garage-hint">Витрина — зажми мышь и вращай, колёсико — приближение</div>
   <div class="garage-actions">
     <button class="btn" id="btn-buy" style="display:none">Купить</button>
     <button class="btn" id="btn-start">В бой</button>
   </div>
+</div>
+
+<div class="overlay hidden" id="loot-overlay">
+  <div class="loot-box" id="loot-box">📦</div>
+  <div class="final-score" id="loot-result"></div>
+  <button class="btn hidden" id="btn-claim">Забрать</button>
 </div>
 
 <div class="overlay hidden" id="gameover">
@@ -150,12 +167,19 @@
   <button class="btn secondary" id="btn-garage" style="margin-top:12px">В ангар</button>
 </div>
 
-<script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+<script>
+window.__mtReady = false;
+setTimeout(function () {
+  var l = document.getElementById('loading');
+  if (l && !window.__mtReady) {
+    l.innerHTML = 'Не удалось загрузить 3D-движок.<br>Проверь интернет-соединение и открой игру<br>в свежем Chrome, Edge или Firefox.';
+    l.style.color = '#ff9c6e';
+  }
+}, 9000);
 </script>
 
 <script type="module">
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 const WORLD_SIZE = 140;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -164,8 +188,14 @@ const rand = (a, b) => a + Math.random() * (b - a);
 let scene, camera, renderer, clock;
 let player, enemies = [], shells = [], obstacles = [], particles = [];
 let keys = {}, mouse = { x: 0, y: 0, down: false };
-let aimPoint = new THREE.Vector3();
+let aimPoint = null;
 let state = 'garage';
+let score = 0, wave = 0, waveTimer = 0, enemiesToSpawn = 0, spawnTimer = 0;
+let shakeAmount = 0, boosterActive = false;
+let minimapCtx, hangar, sunLight, hemiLight;
+let garageCam = { orbit: 0, dist: 12, dragging: false, lastX: 0 };
+const groundRay = new THREE.Raycaster();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
 const TANKS = [
   { id: 'scout',   name: 'Барс-1М',  tier: 1, cost: 0,    color: 0x2e6f3e, hp: 4, speed: 15,  turn: 2.1, reload: 0.9, damage: 1, scale: 0.95, desc: 'Стремительный разведчик. Скорость — твоя броня: обходи врагов и бей в борт.' },
@@ -174,24 +204,56 @@ const TANKS = [
   { id: 'mbt',     name: 'Абрамс-X', tier: 4, cost: 4500, color: 0x37424a, hp: 8, speed: 13,  turn: 1.9, reload: 1.0, damage: 3, scale: 1.12, desc: 'Современный ОБТ: точная стрельба, быстрая перезарядка и живучесть — вершина ветки.' }
 ];
 
-let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', orbit: 0 };
+const SKINS = [
+  { id: 'forest', name: 'Лесной',      color: 0x4a5d3a, rarity: 'common', metal: 0.1 },
+  { id: 'desert', name: 'Пустынный',   color: 0xbfa46f, rarity: 'common', metal: 0.1 },
+  { id: 'arctic', name: 'Арктический', color: 0xdde6ea, rarity: 'rare',   metal: 0.15 },
+  { id: 'night',  name: 'Ночной',      color: 0x23282e, rarity: 'rare',   metal: 0.35 },
+  { id: 'ember',  name: 'Пламя',       color: 0xb23a1a, rarity: 'epic',   metal: 0.3 },
+  { id: 'chrome', name: 'Хром',        color: 0xaebfc9, rarity: 'epic',   metal: 0.85 },
+  { id: 'gold',   name: 'Золото',      color: 0xd4af37, rarity: 'epic',   metal: 0.9 }
+];
+
+const CONTAINERS = [
+  { id: 'std',   name: 'Стандартный', cost: 300,  icon: '📦',
+    desc: 'Кредиты, обычный камуфляж или бустер ×2',
+    rolls: [ { type: 'credits', min: 60, max: 250, chance: 0.62 }, { type: 'skin', rarity: 'common', chance: 0.28 }, { type: 'booster', chance: 0.10 } ] },
+  { id: 'rare',  name: 'Редкий', cost: 900,  icon: '🎁',
+    desc: 'Больше кредитов, редкие камуфляжи, бустеры',
+    rolls: [ { type: 'credits', min: 200, max: 600, chance: 0.52 }, { type: 'skin', rarity: 'rare', chance: 0.36 }, { type: 'booster', chance: 0.12 } ] },
+  { id: 'elite', name: 'Элитный', cost: 2500, icon: '🏆',
+    desc: 'Шанс выбить эпические камуфляжи: Хром и Золото',
+    rolls: [ { type: 'credits', min: 500, max: 1200, chance: 0.40 }, { type: 'skin', rarity: 'epic', chance: 0.42 }, { type: 'booster', chance: 0.18 } ] }
+];
+
+let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0 };
 try {
-  const saved = JSON.parse(localStorage.getItem('modernTanksSave') || '{}');
+  const saved = JSON.parse(localStorage.getItem('modernTanksSave2') || '{}');
   if (Number.isFinite(saved.credits)) garage.credits = saved.credits;
   if (Array.isArray(saved.unlocked) && saved.unlocked.length) garage.unlocked = saved.unlocked;
   if (saved.selected && TANKS.some(t => t.id === saved.selected)) garage.selected = saved.selected;
+  if (Array.isArray(saved.skinsOwned)) garage.skinsOwned = saved.skinsOwned;
+  if (saved.equipped && typeof saved.equipped === 'object') garage.equipped = saved.equipped;
+  if (Number.isFinite(saved.booster)) garage.booster = saved.booster;
 } catch (e) { /* сохранение недоступно */ }
 function saveGarage() {
   try {
-    localStorage.setItem('modernTanksSave', JSON.stringify({ credits: garage.credits, unlocked: garage.unlocked, selected: garage.selected }));
+    localStorage.setItem('modernTanksSave2', JSON.stringify({
+      credits: garage.credits, unlocked: garage.unlocked, selected: garage.selected,
+      skinsOwned: garage.skinsOwned, equipped: garage.equipped, booster: garage.booster
+    }));
   } catch (e) { /* сохранение недоступно */ }
 }
 function getTankCfg(id) { return TANKS.find(t => t.id === id) || TANKS[0]; }
-let score = 0, wave = 0, waveTimer = 0, enemiesToSpawn = 0, spawnTimer = 0;
-let shakeAmount = 0;
-let minimapCtx;
-const groundRay = new THREE.Raycaster();
-const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+function buildTankCfg(id) {
+  const cfg = Object.assign({}, getTankCfg(id));
+  const sid = garage.equipped[id];
+  if (sid) {
+    const s = SKINS.find(x => x.id === sid);
+    if (s) { cfg.color = s.color; cfg.metal = s.metal; }
+  }
+  return cfg;
+}
 
 function init() {
   const canvas = document.getElementById('game-canvas');
@@ -202,52 +264,26 @@ function init() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87a8bd);
-  scene.fog = new THREE.Fog(0x87a8bd, 60, 160);
+  scene.background = new THREE.Color(0x0b0f14);
 
   camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 400);
-  camera.position.set(0, 14, 18);
+  camera.position.set(0, 5, 12);
 
-  const hemi = new THREE.HemisphereLight(0xbfd8e8, 0x3d4a35, 0.9);
-  scene.add(hemi);
-  const sun = new THREE.DirectionalLight(0xfff2d9, 1.4);
-  sun.position.set(40, 60, 25);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -90; sun.shadow.camera.right = 90;
-  sun.shadow.camera.top = 90; sun.shadow.camera.bottom = -90;
-  scene.add(sun);
+  hemiLight = new THREE.HemisphereLight(0xbfd8e8, 0x3d4a35, 0.25);
+  scene.add(hemiLight);
+  sunLight = new THREE.DirectionalLight(0xfff2d9, 1.4);
+  sunLight.position.set(40, 60, 25);
+  sunLight.visible = false;
+  scene.add(sunLight);
 
-  const groundGeo = new THREE.PlaneGeometry(WORLD_SIZE * 2, WORLD_SIZE * 2);
-  const groundCanvas = document.createElement('canvas');
-  groundCanvas.width = groundCanvas.height = 512;
-  const g = groundCanvas.getContext('2d');
-  g.fillStyle = '#5d6b4a';
-  g.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 4000; i++) {
-    const shade = 80 + Math.floor(Math.random() * 40);
-    g.fillStyle = `rgb(${shade - 10},${shade},${shade - 34})`;
-    g.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
-  }
-  const groundTex = new THREE.CanvasTexture(groundCanvas);
-  groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
-  groundTex.repeat.set(24, 24);
-  const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ map: groundTex, roughness: 1 }));
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
+  buildWorld();
+  hangar = buildHangar();
+  scene.add(hangar);
 
-  const border = new THREE.Mesh(
-    new THREE.BoxGeometry(WORLD_SIZE * 2 + 8, 3, WORLD_SIZE * 2 + 8),
-    new THREE.MeshStandardMaterial({ color: 0x39424e, transparent: true, opacity: 0.35 })
-  );
-  border.position.y = 1.5;
-  scene.add(border);
-
-  for (let i = 0; i < 26; i++) addObstacle();
-
-  player = createTank(getTankCfg(garage.selected), true);
-  player.position.set(0, 0, 20);
+  player = createTank(buildTankCfg(garage.selected), true);
+  player.group.position.set(0, 0.3, 0);
+  player.heading = -0.6;
+  player.group.rotation.y = player.heading;
   scene.add(player.group);
 
   minimapCtx = document.getElementById('minimap').getContext('2d');
@@ -256,34 +292,80 @@ function init() {
   addEventListener('resize', onResize);
   addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
   addEventListener('keyup', e => { keys[e.code] = false; });
-  addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-  addEventListener('mousedown', e => { if (e.button === 0) mouse.down = true; });
-  addEventListener('mouseup', e => { if (e.button === 0) mouse.down = false; });
+  addEventListener('mousemove', onMouseMove);
+  addEventListener('mousedown', e => {
+    if (e.button === 0) {
+      mouse.down = true;
+      if (state === 'garage') { garageCam.dragging = true; garageCam.lastX = e.clientX; }
+    }
+  });
+  addEventListener('mouseup', e => { if (e.button === 0) { mouse.down = false; garageCam.dragging = false; } });
+  addEventListener('wheel', e => {
+    if (state === 'garage') garageCam.dist = clamp(garageCam.dist + e.deltaY * 0.01, 7, 20);
+  }, { passive: true });
   addEventListener('contextmenu', e => e.preventDefault());
 
   document.getElementById('btn-start').addEventListener('click', startGame);
   document.getElementById('btn-restart').addEventListener('click', startGame);
   document.getElementById('btn-garage').addEventListener('click', enterGarage);
-  document.getElementById('btn-buy').addEventListener('click', () => {
-    const cfg = getTankCfg(garage.selected);
-    if (!garage.unlocked.includes(garage.selected) && garage.credits >= cfg.cost) {
-      garage.credits -= cfg.cost;
-      garage.unlocked.push(garage.selected);
-      saveGarage();
-      playSound('hit');
-      renderGarage();
-    }
+  document.getElementById('btn-claim').addEventListener('click', () => {
+    document.getElementById('loot-overlay').classList.add('hidden');
+    renderGarage();
   });
+  document.getElementById('btn-buy').addEventListener('click', buySelectedTank);
+  document.getElementById('tab-tanks').addEventListener('click', () => switchTab('tanks'));
+  document.getElementById('tab-shop').addEventListener('click', () => switchTab('shop'));
+  document.getElementById('tab-storage').addEventListener('click', () => switchTab('storage'));
 
+  window.__mtReady = true;
   document.getElementById('loading').style.display = 'none';
   enterGarage();
   animate();
 }
 
+function onMouseMove(e) {
+  if (state === 'garage' && garageCam.dragging) {
+    garageCam.orbit -= (e.clientX - garageCam.lastX) * 0.008;
+    garageCam.lastX = e.clientX;
+  }
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+}
+
+function onResize() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+}
+
+function buildWorld() {
+  const groundCanvas = document.createElement('canvas');
+  groundCanvas.width = groundCanvas.height = 512;
+  const g = groundCanvas.getContext('2d');
+  g.fillStyle = '#5d6b4a';
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 4000; i++) {
+    const shade = 80 + Math.floor(Math.random() * 40);
+    g.fillStyle = 'rgb(' + (shade - 10) + ',' + shade + ',' + (shade - 34) + ')';
+    g.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+  }
+  const groundTex = new THREE.CanvasTexture(groundCanvas);
+  groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
+  groundTex.repeat.set(24, 24);
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(WORLD_SIZE * 2, WORLD_SIZE * 2),
+    new THREE.MeshStandardMaterial({ map: groundTex, roughness: 1 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  for (let i = 0; i < 26; i++) addObstacle();
+}
+
 function addObstacle() {
   const type = Math.random();
-  let mesh, r;
-  let hTop;
+  let mesh, r, hTop;
   if (type < 0.45) {
     const s = rand(2, 4);
     const h = rand(2, 4);
@@ -322,28 +404,116 @@ function addObstacle() {
   obstacles.push({ mesh, r, h: hTop });
 }
 
+function buildHangar() {
+  const h = new THREE.Group();
+  const dark = new THREE.MeshStandardMaterial({ color: 0x1b2128, roughness: 0.9 });
+  const darker = new THREE.MeshStandardMaterial({ color: 0x141a20, roughness: 0.95 });
+
+  const floor = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 0.3, 48),
+    new THREE.MeshStandardMaterial({ color: 0x2b3138, roughness: 0.75, metalness: 0.15 }));
+  floor.position.y = 0.15;
+  floor.receiveShadow = true;
+  h.add(floor);
+
+  const ring = new THREE.Mesh(new THREE.RingGeometry(6.4, 6.8, 48),
+    new THREE.MeshBasicMaterial({ color: 0xffd166, side: THREE.DoubleSide, transparent: true, opacity: 0.55 }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.31;
+  h.add(ring);
+
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(21, 21, 17, 48, 1, true),
+    new THREE.MeshStandardMaterial({ color: 0x171c22, roughness: 0.95, side: THREE.BackSide }));
+  wall.position.y = 8.5;
+  h.add(wall);
+
+  for (let i = 0; i < 26; i++) {
+    const a = (i / 26) * Math.PI * 2;
+    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.35, 15, 0.7), dark);
+    pillar.position.set(Math.cos(a) * 20.6, 8, Math.sin(a) * 20.6);
+    pillar.rotation.y = -a;
+    h.add(pillar);
+  }
+
+  const ceil = new THREE.Mesh(new THREE.CylinderGeometry(21, 21, 0.5, 48), darker);
+  ceil.position.y = 17;
+  h.add(ceil);
+
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2;
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(3.4, 13, 24, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xfff2cc, transparent: true, opacity: 0.055, side: THREE.DoubleSide, depthWrite: false }));
+    cone.position.set(Math.cos(a) * 5.5, 10.4, Math.sin(a) * 5.5);
+    h.add(cone);
+
+    const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.1, 0.5, 12),
+      new THREE.MeshBasicMaterial({ color: 0xfff6da }));
+    lamp.position.set(Math.cos(a) * 5.5, 16.6, Math.sin(a) * 5.5);
+    h.add(lamp);
+
+    const spot = new THREE.SpotLight(0xfff2cc, 260, 40, 0.5, 0.45, 1.6);
+    spot.position.copy(lamp.position).setY(16.2);
+    spot.target.position.set(0, 1, 0);
+    if (i === 0) { spot.castShadow = true; spot.shadow.mapSize.set(1024, 1024); }
+    h.add(spot);
+    h.add(spot.target);
+  }
+
+  for (let i = 0; i < 6; i++) {
+    const a = rand(0, Math.PI * 2);
+    const d = rand(7.5, 9.2);
+    const crate = new THREE.Mesh(new THREE.BoxGeometry(rand(1, 1.8), rand(1, 1.8), rand(1, 1.8)),
+      new THREE.MeshStandardMaterial({ color: 0x4a4436, roughness: 0.85 }));
+    crate.position.set(Math.cos(a) * d, 0.3 + crate.geometry.parameters.height / 2, Math.sin(a) * d);
+    crate.rotation.y = rand(0, Math.PI);
+    crate.castShadow = crate.receiveShadow = true;
+    h.add(crate);
+  }
+
+  return h;
+}
+
 function createTank(cfg, isPlayer) {
   const group = new THREE.Group();
   group.scale.setScalar(cfg.scale || 1);
-  const mat = new THREE.MeshStandardMaterial({ color: cfg.color, roughness: 0.6, metalness: 0.35 });
+  const mat = new THREE.MeshStandardMaterial({ color: cfg.color, roughness: 0.55, metalness: cfg.metal !== undefined ? cfg.metal : 0.35 });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x22282c, roughness: 0.8 });
+  const trackMat = new THREE.MeshStandardMaterial({ color: 0x15181c, roughness: 0.95 });
+
+  const body = new THREE.Group();
+  group.add(body);
 
   const hull = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 3.8), mat);
   hull.position.y = 0.85;
   hull.castShadow = true;
-  group.add(hull);
+  body.add(hull);
 
   const glacis = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.7, 1.1), mat);
   glacis.position.set(0, 0.7, 2.15);
   glacis.rotation.x = 0.5;
   glacis.castShadow = true;
-  group.add(glacis);
+  body.add(glacis);
+
+  const engineDeck = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.22, 1.2), darkMat);
+  engineDeck.position.set(0, 1.36, -1.35);
+  body.add(engineDeck);
 
   for (const s of [-1, 1]) {
-    const track = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 4.2), darkMat);
+    const track = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 4.2), trackMat);
     track.position.set(s * 1.25, 0.42, 0);
     track.castShadow = true;
-    group.add(track);
+    body.add(track);
+
+    const skirt = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.45, 4.0), mat);
+    skirt.position.set(s * 1.62, 0.85, 0);
+    skirt.castShadow = true;
+    body.add(skirt);
+
+    for (let w = 0; w < 5; w++) {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 12), darkMat);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(s * 1.28, 0.32, -1.5 + w * 0.75);
+      body.add(wheel);
+    }
   }
 
   const turret = new THREE.Group();
@@ -352,22 +522,48 @@ function createTank(cfg, isPlayer) {
   turretBody.position.y = 0.3;
   turretBody.castShadow = true;
   turret.add(turretBody);
+
+  const stowage = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.4, 0.7), darkMat);
+  stowage.position.set(0, 0.45, -1.05);
+  turret.add(stowage);
+
+  const mg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.9, 6), darkMat);
+  mg.rotation.x = Math.PI / 2;
+  mg.position.set(0.35, 0.75, 0.5);
+  turret.add(mg);
+
+  for (const s of [-1, 1]) {
+    const smoke = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 6), darkMat);
+    smoke.rotation.z = s * 0.5;
+    smoke.position.set(s * 0.95, 0.55, 0.55);
+    turret.add(smoke);
+  }
+
+  const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.6, 4), darkMat);
+  antenna.position.set(-0.6, 1.3, -0.9);
+  turret.add(antenna);
+
   const mantlet = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.7), darkMat);
   mantlet.position.set(0, 0.3, 1.0);
   turret.add(mantlet);
+
+  const pitch = new THREE.Group();
+  pitch.position.set(0, 0.3, 1.0);
   const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 3.2, 10), darkMat);
   barrel.rotation.x = Math.PI / 2;
-  barrel.position.set(0, 0.3, 2.6);
+  barrel.position.z = 1.6;
   barrel.castShadow = true;
-  turret.add(barrel);
+  pitch.add(barrel);
   const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.5, 10), darkMat);
   muzzle.rotation.x = Math.PI / 2;
-  muzzle.position.set(0, 0.3, 4.0);
-  turret.add(muzzle);
+  muzzle.position.z = 3.0;
+  pitch.add(muzzle);
+  turret.add(pitch);
+
   const hatch = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.15, 10), darkMat);
   hatch.position.set(0, 0.7, -0.3);
   turret.add(hatch);
-  group.add(turret);
+  body.add(turret);
 
   let hpBar = null;
   if (!isPlayer) {
@@ -382,13 +578,16 @@ function createTank(cfg, isPlayer) {
   }
 
   return {
-    group, turret, barrel,
+    group, body, turret, pitch, muzzle,
     isPlayer,
     hp: cfg.hp,
     maxHp: cfg.hp,
     damage: cfg.damage || 1,
-    speed: 0, heading: 0,
-    reload: 0, reloadTime: cfg.reloadTime,
+    vel: new THREE.Vector3(),
+    prevLong: 0, tiltPitch: 0, tiltRoll: 0,
+    heading: 0,
+    reload: 0, reloadTime: cfg.reloadTime || cfg.reload,
+    barrelKick: 0,
     alive: true,
     hpBar,
     ai: isPlayer ? null : { state: 'chase', strafeDir: Math.random() < 0.5 ? 1 : -1, strafeTimer: rand(1, 3) }
@@ -417,7 +616,6 @@ function spawnEnemy() {
   }, false);
   const ang = rand(0, Math.PI * 2);
   const dist = rand(55, 75);
-  t.position = t.group.position;
   t.group.position.set(
     clamp(player.group.position.x + Math.cos(ang) * dist, -WORLD_SIZE + 8, WORLD_SIZE - 8), 0,
     clamp(player.group.position.z + Math.sin(ang) * dist, -WORLD_SIZE + 8, WORLD_SIZE - 8)
@@ -429,11 +627,198 @@ function spawnEnemy() {
   enemies.push(t);
 }
 
+function switchTab(tab) {
+  document.getElementById('tab-tanks').classList.toggle('active', tab === 'tanks');
+  document.getElementById('tab-shop').classList.toggle('active', tab === 'shop');
+  document.getElementById('tab-storage').classList.toggle('active', tab === 'storage');
+  document.getElementById('panel-tanks').classList.toggle('active', tab === 'tanks');
+  document.getElementById('panel-shop').classList.toggle('active', tab === 'shop');
+  document.getElementById('panel-storage').classList.toggle('active', tab === 'storage');
+  document.getElementById('stat-panel').classList.toggle('hidden', tab !== 'tanks');
+  document.getElementById('garage-hint').style.display = tab === 'tanks' ? '' : 'none';
+  document.getElementById('btn-buy').style.display = 'none';
+  document.getElementById('btn-start').style.display = tab === 'tanks' ? '' : 'none';
+  renderGarage();
+}
+
+function buySelectedTank() {
+  const cfg = getTankCfg(garage.selected);
+  if (!garage.unlocked.includes(garage.selected) && garage.credits >= cfg.cost) {
+    garage.credits -= cfg.cost;
+    garage.unlocked.push(garage.selected);
+    saveGarage();
+    playSound('hit');
+    renderGarage();
+  }
+}
+
+function openContainer(c) {
+  if (garage.credits < c.cost) return;
+  garage.credits -= c.cost;
+  const roll = Math.random();
+  let acc = 0;
+  let reward = c.rolls[c.rolls.length - 1];
+  for (const r of c.rolls) {
+    acc += r.chance;
+    if (roll < acc) { reward = r; break; }
+  }
+  let icon = '💰', text = '';
+  if (reward.type === 'credits') {
+    const amount = Math.floor(rand(reward.min, reward.max));
+    garage.credits += amount;
+    text = '+' + amount + ' ⬤ кредитов';
+  } else if (reward.type === 'skin') {
+    const pool = SKINS.filter(s => s.rarity === reward.rarity && !garage.skinsOwned.includes(s.id));
+    if (pool.length) {
+      const skin = pool[Math.floor(Math.random() * pool.length)];
+      garage.skinsOwned.push(skin.id);
+      icon = '🎨';
+      text = 'Камуфляж «' + skin.name + '» — ' + ({ common: 'обычный', rare: 'редкий', epic: 'эпический' })[skin.rarity];
+    } else {
+      garage.credits += 400;
+      text = '+400 ⬤ (все камуфляжи этого уровня уже у тебя)';
+    }
+  } else {
+    if (garage.booster < 3) {
+      garage.booster += 1;
+      icon = '⚡';
+      text = 'Бустер ×2 кредитов! Зарядов: ' + garage.booster;
+    } else {
+      garage.credits += 250;
+      text = '+250 ⬤ (склад бустеров полон)';
+    }
+  }
+  saveGarage();
+  playSound('boom', 0.6);
+  const overlay = document.getElementById('loot-overlay');
+  const box = document.getElementById('loot-box');
+  const result = document.getElementById('loot-result');
+  const claim = document.getElementById('btn-claim');
+  box.className = 'loot-box';
+  box.textContent = c.icon;
+  result.textContent = '';
+  claim.classList.add('hidden');
+  overlay.classList.remove('hidden');
+  setTimeout(() => {
+    box.className = 'loot-reward';
+    box.textContent = icon;
+    result.textContent = text;
+    claim.classList.remove('hidden');
+    playSound('hit');
+  }, 1300);
+}
+
+function renderGarage() {
+  document.getElementById('credits-display').textContent = '⬤ ' + garage.credits;
+
+  const tanksPanel = document.getElementById('panel-tanks');
+  tanksPanel.innerHTML = '';
+  for (const t of TANKS) {
+    const owned = garage.unlocked.includes(t.id);
+    const card = document.createElement('div');
+    card.className = 'tank-card' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked');
+    card.innerHTML = '<div class="tank-tier">Уровень ' + t.tier + '</div>' +
+      '<div class="tank-name">' + t.name + '</div>' +
+      '<div class="tank-cost ' + (owned ? 'owned' : '') + '">' + (owned ? '✓ В ангаре' : '⬤ ' + t.cost) + '</div>';
+    card.addEventListener('click', () => {
+      garage.selected = t.id;
+      saveGarage();
+      rebuildTankPreview();
+      renderGarage();
+    });
+    tanksPanel.appendChild(card);
+  }
+
+  const cfg = getTankCfg(garage.selected);
+  const owned = garage.unlocked.includes(garage.selected);
+  const bar = (label, val, max, unit) =>
+    '<div class="stat-row"><div class="stat-name"><span>' + label + '</span><span>' + val + unit + '</span></div>' +
+    '<div class="stat-bar"><div style="width:' + Math.min(100, val / max * 100) + '%"></div></div></div>';
+  document.getElementById('stat-panel').innerHTML =
+    '<div class="tank-name" style="font-size:20px">' + cfg.name + '</div>' +
+    '<div class="tank-desc">' + cfg.desc + '</div><div style="height:10px"></div>' +
+    bar('Броня', cfg.hp, 10, '') +
+    bar('Скорость', cfg.speed, 18, '') +
+    bar('Урон', cfg.damage, 4, '') +
+    bar('Перезарядка', cfg.reload.toFixed(1) + ' с', 2, '') +
+    (owned ? '' : '<div class="tank-cost" style="margin-top:6px">Цена: ⬤ ' + cfg.cost + '</div>');
+
+  const btnBuy = document.getElementById('btn-buy');
+  btnBuy.style.display = owned ? 'none' : '';
+  btnBuy.textContent = garage.credits >= cfg.cost ? 'Купить за ⬤ ' + cfg.cost : 'Не хватает ⬤ ' + (cfg.cost - garage.credits);
+  btnBuy.disabled = garage.credits < cfg.cost;
+  document.getElementById('btn-start').disabled = !owned;
+
+  const shopPanel = document.getElementById('panel-shop');
+  shopPanel.innerHTML = '';
+  for (const c of CONTAINERS) {
+    const card = document.createElement('div');
+    card.className = 'container-card';
+    card.innerHTML = '<div class="box-icon">' + c.icon + '</div>' +
+      '<div class="c-name">' + c.name + '</div>' +
+      '<div class="c-desc">' + c.desc + '</div>' +
+      '<div class="tank-cost">⬤ ' + c.cost + '</div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.style.marginTop = '8px';
+    btn.style.width = '100%';
+    btn.textContent = 'Открыть';
+    btn.disabled = garage.credits < c.cost;
+    btn.addEventListener('click', () => openContainer(c));
+    card.appendChild(btn);
+    shopPanel.appendChild(card);
+  }
+
+  const storagePanel = document.getElementById('panel-storage');
+  storagePanel.innerHTML = '';
+  if (garage.booster > 0) {
+    const b = document.createElement('div');
+    b.className = 'skin-card';
+    b.innerHTML = '<div style="font-size:34px">⚡</div>' +
+      '<div class="c-name" style="font-size:15px">Бустер ×2</div>' +
+      '<div class="c-desc" style="font-size:12px">Кредиты ×2 в следующем бою. Зарядов: ' + garage.booster + '</div>';
+    storagePanel.appendChild(b);
+  }
+  if (!garage.skinsOwned.length && garage.booster === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'tank-desc';
+    empty.style.textAlign = 'center';
+    empty.style.width = '100%';
+    empty.textContent = 'Хранилище пусто. Открывай контейнеры в магазине!';
+    storagePanel.appendChild(empty);
+  }
+  for (const sid of garage.skinsOwned) {
+    const s = SKINS.find(x => x.id === sid);
+    if (!s) continue;
+    const equipped = garage.equipped[garage.selected] === s.id;
+    const card = document.createElement('div');
+    card.className = 'skin-card';
+    card.innerHTML = '<div class="skin-swatch" style="background:#' + s.color.toString(16).padStart(6, '0') + '"></div>' +
+      '<div class="c-name" style="font-size:15px">' + s.name + '</div>' +
+      '<div class="skin-rarity ' + s.rarity + '">' + ({ common: 'Обычный', rare: 'Редкий', epic: 'Эпический' })[s.rarity] + '</div>' +
+      '<div class="c-desc" style="font-size:11px;min-height:0;margin-top:4px">для: ' + getTankCfg(garage.selected).name + '</div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn small secondary';
+    btn.style.marginTop = '8px';
+    btn.style.width = '100%';
+    btn.textContent = equipped ? 'Снять' : 'Надеть';
+    btn.addEventListener('click', () => {
+      if (garage.equipped[garage.selected] === s.id) delete garage.equipped[garage.selected];
+      else garage.equipped[garage.selected] = s.id;
+      saveGarage();
+      rebuildTankPreview();
+      renderGarage();
+    });
+    card.appendChild(btn);
+    storagePanel.appendChild(card);
+  }
+}
+
 function rebuildPlayer() {
   const pos = player.group.position.clone();
   const heading = player.heading;
   scene.remove(player.group);
-  player = createTank(getTankCfg(garage.selected), true);
+  player = createTank(buildTankCfg(garage.selected), true);
   player.group.position.copy(pos);
   player.heading = heading;
   player.group.rotation.y = heading;
@@ -442,13 +827,13 @@ function rebuildPlayer() {
 
 function rebuildTankPreview() {
   scene.remove(player.group);
-  player = createTank(getTankCfg(garage.selected), true);
-  player.group.position.set(0, 0, 0);
+  player = createTank(buildTankCfg(garage.selected), true);
+  player.group.position.set(0, 0.3, 0);
   player.heading = -0.6;
   player.group.rotation.y = player.heading;
   scene.add(player.group);
   for (let i = obstacles.length - 1; i >= 0; i--) {
-    if (Math.hypot(obstacles[i].mesh.position.x, obstacles[i].mesh.position.z) < 8) {
+    if (Math.hypot(obstacles[i].mesh.position.x, obstacles[i].mesh.position.z) < 11) {
       scene.remove(obstacles[i].mesh);
       obstacles.splice(i, 1);
     }
@@ -462,49 +847,13 @@ function enterGarage() {
   document.getElementById('hud').classList.add('hidden');
   document.body.style.cursor = 'default';
   document.getElementById('crosshair').style.display = 'none';
+  hangar.visible = true;
+  sunLight.visible = false;
+  hemiLight.intensity = 0.25;
+  scene.fog = null;
+  scene.background = new THREE.Color(0x0b0f14);
   rebuildTankPreview();
-  renderGarage();
-}
-
-function selectTank(id) {
-  garage.selected = id;
-  saveGarage();
-  rebuildTankPreview();
-  renderGarage();
-}
-
-function renderGarage() {
-  document.getElementById('credits-display').textContent = '⬤ ' + garage.credits;
-  const branch = document.getElementById('tank-branch');
-  branch.innerHTML = '';
-  for (const t of TANKS) {
-    const owned = garage.unlocked.includes(t.id);
-    const card = document.createElement('div');
-    card.className = 'tank-card' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked');
-    card.innerHTML = '<div class="tank-tier">Уровень ' + t.tier + '</div>' +
-      '<div class="tank-name">' + t.name + '</div>' +
-      '<div class="tank-cost ' + (owned ? 'owned' : '') + '">' + (owned ? '✓ В ангаре' : '⬤ ' + t.cost) + '</div>';
-    card.addEventListener('click', () => selectTank(t.id));
-    branch.appendChild(card);
-  }
-  const cfg = getTankCfg(garage.selected);
-  const owned = garage.unlocked.includes(garage.selected);
-  const bar = (label, val, max, unit) =>
-    '<div class="stat-row"><div class="stat-name"><span>' + label + '</span><span>' + val + unit + '</span></div>' +
-    '<div class="stat-bar"><div style="width:' + Math.min(100, val / max * 100) + '%"></div></div></div>';
-  document.getElementById('stat-panel').innerHTML =
-    '<div class="tank-name" style="font-size:20px">' + cfg.name + '</div>' +
-    '<div class="tank-desc">' + cfg.desc + '</div><div style="height:10px"></div>' +
-    bar('Броня', cfg.hp, 10, '') +
-    bar('Скорость', cfg.speed, 18, '') +
-    bar('Урон', cfg.damage, 4, '') +
-    bar('Перезарядка', cfg.reload, 2, ' с') +
-    (owned ? '' : '<div class="tank-cost" style="margin-top:6px">Цена: ⬤ ' + cfg.cost + '</div>');
-  const btnBuy = document.getElementById('btn-buy');
-  btnBuy.style.display = owned ? 'none' : '';
-  btnBuy.textContent = garage.credits >= cfg.cost ? 'Купить за ⬤ ' + cfg.cost : 'Не хватает ⬤ ' + (cfg.cost - garage.credits);
-  btnBuy.disabled = garage.credits < cfg.cost;
-  document.getElementById('btn-start').disabled = !owned;
+  switchTab('tanks');
 }
 
 function startGame() {
@@ -512,6 +861,7 @@ function startGame() {
   document.getElementById('garage').classList.remove('active');
   document.getElementById('gameover').classList.add('hidden');
   rebuildPlayer();
+
   for (const t of enemies) scene.remove(t.group);
   enemies = [];
   for (const s of shells) scene.remove(s.mesh);
@@ -521,17 +871,35 @@ function startGame() {
   player.hp = player.maxHp;
   player.alive = true;
   player.reload = 0;
+  player.vel.set(0, 0, 0);
+  player.barrelKick = 0;
   player.group.position.set(0, 0, 20);
   player.heading = 0;
   player.group.rotation.y = 0;
-  player.group.rotation.z = 0;
+  player.body.rotation.set(0, 0, 0);
+  player.turret.rotation.y = 0;
+  player.pitch.rotation.x = 0;
+
+  hangar.visible = false;
+  sunLight.visible = true;
+  hemiLight.intensity = 0.9;
+  scene.fog = new THREE.Fog(0x87a8bd, 60, 160);
+  scene.background = new THREE.Color(0x87a8bd);
+
+  boosterActive = false;
+  if (garage.booster > 0) {
+    garage.booster -= 1;
+    boosterActive = true;
+    saveGarage();
+  }
+
   score = 0;
   wave = 0;
   waveTimer = 1.2;
   state = 'playing';
   document.body.style.cursor = 'none';
-  document.getElementById('hud').classList.remove('hidden');
   document.getElementById('crosshair').style.display = 'block';
+  document.getElementById('hud').classList.remove('hidden');
   updateHud();
 }
 
@@ -555,13 +923,12 @@ function plural(n, forms) {
 function fire(tank) {
   if (tank.reload > 0 || !tank.alive) return;
   tank.reload = tank.reloadTime;
-  const barrelWorld = new THREE.Vector3();
-  tank.barrel.getWorldPosition(barrelWorld);
+  tank.barrelKick = 0.45;
+
+  const muzzlePos = new THREE.Vector3();
+  tank.muzzle.getWorldPosition(muzzlePos);
   const dir = new THREE.Vector3();
-  tank.barrel.getWorldDirection(dir);
-  const muzzleOffset = dir.clone().multiplyScalar(1.8);
-  const spawnPos = barrelWorld.clone().add(muzzleOffset);
-  spawnPos.y = Math.max(spawnPos.y, 1.6);
+  tank.pitch.getWorldDirection(dir);
 
   const spread = tank.isPlayer ? 0.006 : 0.035;
   dir.x += rand(-spread, spread);
@@ -572,53 +939,26 @@ function fire(tank) {
     new THREE.CapsuleGeometry(0.13, 0.5, 4, 8),
     new THREE.MeshStandardMaterial({ color: tank.isPlayer ? 0xffd166 : 0xff6b6b, emissive: tank.isPlayer ? 0x704d00 : 0x661111, emissiveIntensity: 2 })
   );
-  shell.position.copy(spawnPos);
+  shell.position.copy(muzzlePos);
   scene.add(shell);
-  shells.push({ mesh: shell, dir, speed: 55, owner: tank, life: 3, damage: tank.damage });
+  shells.push({ mesh: shell, vel: dir.multiplyScalar(55), owner: tank, life: 4, damage: tank.damage });
 
   const flash = new THREE.Mesh(
     new THREE.SphereGeometry(0.55, 8, 8),
     new THREE.MeshBasicMaterial({ color: 0xffe9a0, transparent: true, opacity: 0.95 })
   );
-  flash.position.copy(spawnPos);
+  flash.position.copy(muzzlePos);
   scene.add(flash);
   particles.push({ mesh: flash, vel: new THREE.Vector3(), life: 0.08, maxLife: 0.08, kind: 'flash' });
 
   if (tank.isPlayer) {
-    shakeAmount = Math.max(shakeAmount, 0.25);
+    tank.vel.addScaledVector(new THREE.Vector3(Math.sin(tank.heading), 0, Math.cos(tank.heading)), -1.2);
+    shakeAmount = Math.max(shakeAmount, 0.3);
     playSound('shot');
   } else {
     const d = tank.group.position.distanceTo(player.group.position);
     playSound('shot', clamp(1 - d / 80, 0, 1) * 0.5);
   }
-}
-
-function explode(pos, big) {
-  const count = big ? 26 : 12;
-  for (let i = 0; i < count; i++) {
-    const size = rand(0.12, big ? 0.55 : 0.3);
-    const m = new THREE.Mesh(
-      new THREE.BoxGeometry(size, size, size),
-      new THREE.MeshBasicMaterial({ color: i % 3 === 0 ? 0xffe9a0 : i % 3 === 1 ? 0xff8c42 : 0x555555, transparent: true })
-    );
-    m.position.copy(pos);
-    scene.add(m);
-    particles.push({
-      mesh: m, kind: 'debris',
-      vel: new THREE.Vector3(rand(-1, 1), rand(0.3, 1.4), rand(-1, 1)).multiplyScalar(big ? 14 : 8),
-      life: rand(0.5, 1.1), maxLife: 1.1
-    });
-  }
-  const ring = new THREE.Mesh(
-    new THREE.SphereGeometry(big ? 1.6 : 0.9, 12, 12),
-    new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.7 })
-  );
-  ring.position.copy(pos);
-  scene.add(ring);
-  particles.push({ mesh: ring, kind: 'ring', vel: new THREE.Vector3(), life: 0.3, maxLife: 0.3 });
-
-  if (pos.distanceTo(player.group.position) < 12) shakeAmount = Math.max(shakeAmount, big ? 0.7 : 0.3);
-  playSound('boom', clamp(1 - pos.distanceTo(player.group.position) / 90, 0.05, 1));
 }
 
 let audioCtx = null;
@@ -690,35 +1030,59 @@ function collideWithObstacles(pos, radius) {
 function updatePlayer(dt) {
   const p = player;
   if (!p.alive) return;
+  if (!aimPoint) aimPoint = new THREE.Vector3(p.group.position.x, 0, p.group.position.z + 30);
 
-  const boost = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.5 : 1;
-  const accel = 26 * boost;
-  const cfg = getTankCfg(garage.selected);
+  const cfg = buildTankCfg(garage.selected);
+  const boost = (keys['ShiftLeft'] || keys['ShiftRight']) && p.vel.lengthSq() > 1 ? 1.5 : 1;
   const maxSpeed = cfg.speed * boost;
+  const fwd = new THREE.Vector3(Math.sin(p.heading), 0, Math.cos(p.heading));
+  const right = new THREE.Vector3(fwd.z, 0, -fwd.x);
+
+  let vLong = p.vel.dot(fwd);
+  let vLat = p.vel.dot(right);
+
   let input = 0;
   if (keys['KeyW'] || keys['ArrowUp']) input += 1;
   if (keys['KeyS'] || keys['ArrowDown']) input -= 1;
-  if (input !== 0) p.speed += input * accel * dt;
-  else p.speed *= Math.pow(0.02, dt);
-  p.speed = clamp(p.speed, -maxSpeed * 0.55, maxSpeed);
+  if (input !== 0) vLong += input * 30 * boost * dt;
+  vLong *= Math.pow(0.5, dt);
+  vLong = clamp(vLong, -maxSpeed * 0.5, maxSpeed);
+  vLat *= Math.pow(0.0008, dt);
 
   let turn = 0;
   if (keys['KeyA'] || keys['ArrowLeft']) turn += 1;
   if (keys['KeyD'] || keys['ArrowRight']) turn -= 1;
-  const turnRate = cfg.turn * (1 - Math.abs(p.speed) / (maxSpeed * 2.4));
-  p.heading += turn * turnRate * dt * (p.speed < -0.5 ? -1 : 1);
-  p.group.rotation.y = p.heading;
+  const steerAuth = 0.4 + 0.6 * Math.min(1, Math.abs(vLong) / 5);
+  const turnRate = cfg.turn * steerAuth * (vLong < -0.5 ? -1 : 1);
+  p.heading += turn * turnRate * dt;
 
-  const move = new THREE.Vector3(Math.sin(p.heading), 0, Math.cos(p.heading)).multiplyScalar(p.speed * dt);
-  const next = p.group.position.clone().add(move);
+  p.vel.copy(fwd).multiplyScalar(vLong).addScaledVector(right, vLat);
+
+  const impactSpeed = p.vel.length();
+  const next = p.group.position.clone().addScaledVector(p.vel, dt);
+  let blocked = false;
   if (Math.abs(next.x) > WORLD_SIZE - 4 || Math.abs(next.z) > WORLD_SIZE - 4) {
-    p.speed *= 0.3;
+    blocked = true;
   } else {
     p.group.position.x = next.x;
     p.group.position.z = next.z;
   }
-  collideWithObstacles(p.group.position, 1.8);
-  if (collideWithObstacles(p.group.position, 1.8)) p.speed *= 0.6;
+  if (collideWithObstacles(p.group.position, 1.8)) blocked = true;
+  if (blocked) {
+    p.vel.multiplyScalar(0.35);
+    if (impactSpeed > 8) { shakeAmount = Math.max(shakeAmount, 0.3); playSound('hit', 0.4); }
+  }
+
+  const accelInst = (vLong - p.prevLong) / Math.max(dt, 1e-4);
+  p.prevLong = vLong;
+  p.tiltPitch += (clamp(-accelInst * 0.004, -0.09, 0.09) - p.tiltPitch) * Math.min(1, dt * 6);
+  p.tiltRoll += (clamp(turn * vLong * 0.0045, -0.08, 0.08) - p.tiltRoll) * Math.min(1, dt * 6);
+  p.body.rotation.x = p.tiltPitch;
+  p.body.rotation.z = p.tiltRoll;
+  p.group.rotation.y = p.heading;
+
+  p.barrelKick = Math.max(0, p.barrelKick - dt * 2.2);
+  p.pitch.position.z = 1.0 - p.barrelKick * 0.6;
 
   groundRay.setFromCamera(new THREE.Vector2(
     (mouse.x / innerWidth) * 2 - 1, -(mouse.y / innerHeight) * 2 + 1
@@ -735,13 +1099,12 @@ function updatePlayer(dt) {
   while (diff < -Math.PI) diff += Math.PI * 2;
   p.turret.rotation.y += diff * Math.min(1, dt * 10);
 
-  p.reload -= dt;
-  if ((mouse.down || keys['Space']) && p.reload <= 0) fire(p);
+  const aimDist = Math.hypot(dx, dz);
+  const elev = Math.asin(clamp(aimDist * 18 / (2 * 55 * 55), 0, 0.55));
+  p.pitch.rotation.x += (-elev - p.pitch.rotation.x) * Math.min(1, dt * 8);
 
-  const muzzleDir = new THREE.Vector3();
-  p.barrel.getWorldDirection(muzzleDir);
-  p.turret.rotation.z = clamp(-Math.atan2(muzzleDir.y, 1) * 0.5, -0.15, 0.2);
-  p.turret.rotation.x = clamp(Math.atan2(muzzleDir.y, Math.hypot(muzzleDir.x, muzzleDir.z)) * 0.8, -0.25, 0.1);
+  p.reload -= dt;
+  if ((mouse.down || keys['Space']) && p.reload <= 0 && state === 'playing') fire(p);
 }
 
 function updateEnemy(t, dt) {
@@ -778,12 +1141,14 @@ function updateEnemy(t, dt) {
   }
   collideWithObstacles(t.group.position, 1.8);
 
-  const aim = new THREE.Vector3().subVectors(player.group.position, t.group.position);
-  const aimAngle = Math.atan2(aim.x, aim.z) - t.heading;
+  const aimAngle = Math.atan2(toPlayer.x, toPlayer.z) - t.heading;
   let adiff = aimAngle - t.turret.rotation.y;
   while (adiff > Math.PI) adiff -= Math.PI * 2;
   while (adiff < -Math.PI) adiff += Math.PI * 2;
   t.turret.rotation.y += clamp(adiff, -2 * dt, 2 * dt);
+
+  const elev = Math.asin(clamp(dist * 18 / (2 * 55 * 55), 0, 0.55));
+  t.pitch.rotation.x += (-elev - t.pitch.rotation.x) * Math.min(1, dt * 8);
 
   t.reload -= dt;
   const aimed = Math.abs(adiff) < 0.12 && dist < 45 && player.alive;
@@ -794,9 +1159,10 @@ function updateShells(dt) {
   for (let i = shells.length - 1; i >= 0; i--) {
     const s = shells[i];
     s.life -= dt;
-    const step = s.dir.clone().multiplyScalar(s.speed * dt);
-    s.mesh.position.add(step);
-    s.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.dir);
+    s.vel.y -= 18 * dt;
+    s.mesh.position.addScaledVector(s.vel, dt);
+    const dirNorm = s.vel.clone().normalize();
+    s.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirNorm);
 
     let dead = s.life <= 0 || Math.abs(s.mesh.position.x) > WORLD_SIZE + 4 || Math.abs(s.mesh.position.z) > WORLD_SIZE + 4;
     if (!dead && s.mesh.position.y < 0.1) { dead = true; explode(s.mesh.position, false); }
@@ -806,7 +1172,7 @@ function updateShells(dt) {
       for (const t of targets) {
         if (!t.alive) continue;
         const flat = Math.hypot(t.group.position.x - s.mesh.position.x, t.group.position.z - s.mesh.position.z);
-        if (flat < 2.2 && s.mesh.position.y < 3.2) {
+        if (flat < 2.2 && s.mesh.position.y < 3.4) {
           t.hp -= s.damage;
           dead = true;
           if (t.isPlayer) {
@@ -818,8 +1184,8 @@ function updateShells(dt) {
             explode(t.group.position.clone().setY(1.2), true);
             scene.remove(t.group);
             if (!t.isPlayer) {
-              score += 100 + wave * 10;
-              garage.credits += 40 + wave * 10;
+              score += (100 + wave * 10) * (boosterActive ? 2 : 1);
+              garage.credits += (40 + wave * 10) * (boosterActive ? 2 : 1);
               saveGarage();
               playSound('boom', 1);
             }
@@ -845,6 +1211,34 @@ function updateShells(dt) {
       shells.splice(i, 1);
     }
   }
+}
+
+function explode(pos, big) {
+  const count = big ? 26 : 12;
+  for (let i = 0; i < count; i++) {
+    const size = rand(0.12, big ? 0.55 : 0.3);
+    const m = new THREE.Mesh(
+      new THREE.BoxGeometry(size, size, size),
+      new THREE.MeshBasicMaterial({ color: i % 3 === 0 ? 0xffe9a0 : i % 3 === 1 ? 0xff8c42 : 0x555555, transparent: true })
+    );
+    m.position.copy(pos);
+    scene.add(m);
+    particles.push({
+      mesh: m, kind: 'debris',
+      vel: new THREE.Vector3(rand(-1, 1), rand(0.3, 1.4), rand(-1, 1)).multiplyScalar(big ? 14 : 8),
+      life: rand(0.5, 1.1), maxLife: 1.1
+    });
+  }
+  const ring = new THREE.Mesh(
+    new THREE.SphereGeometry(big ? 1.6 : 0.9, 12, 12),
+    new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.7 })
+  );
+  ring.position.copy(pos);
+  scene.add(ring);
+  particles.push({ mesh: ring, kind: 'ring', vel: new THREE.Vector3(), life: 0.3, maxLife: 0.3 });
+
+  if (pos.distanceTo(player.group.position) < 12) shakeAmount = Math.max(shakeAmount, big ? 0.7 : 0.3);
+  playSound('boom', clamp(1 - pos.distanceTo(player.group.position) / 90, 0.05, 1));
 }
 
 function updateParticles(dt) {
@@ -893,8 +1287,10 @@ function updateWaves(dt) {
       banner.textContent = 'Волна ' + wave;
       banner.style.opacity = 1;
       setTimeout(() => banner.style.opacity = 0, 2000);
-      if (wave > 1) score += 50 * (wave - 1);
-      if (player.alive) { player.hp = Math.min(player.maxHp, player.hp + 1); }
+      score += 50 * (wave - 1);
+      garage.credits += (50 + wave * 20) * (boosterActive ? 2 : 1);
+      saveGarage();
+      if (player.alive) player.hp = Math.min(player.maxHp, player.hp + 1);
     }
   }
   for (let i = enemies.length - 1; i >= 0; i--) {
@@ -918,6 +1314,17 @@ function updateCamera(dt) {
   camera.lookAt(look);
 }
 
+function updateGarageCamera(dt) {
+  const d = garageCam.dist;
+  camera.position.lerp(
+    new THREE.Vector3(Math.cos(garageCam.orbit) * d, 4.2, Math.sin(garageCam.orbit) * d),
+    Math.min(1, dt * 5)
+  );
+  camera.lookAt(0, 1.5, 0);
+  if (player.alive) player.turret.rotation.y = Math.sin(garageCam.orbit * 0.6) * 0.6;
+  if (!garageCam.dragging) garageCam.orbit += dt * 0.18;
+}
+
 function updateHud() {
   const frac = Math.max(player.hp, 0) / player.maxHp;
   const fill = document.getElementById('hp-fill');
@@ -929,6 +1336,7 @@ function updateHud() {
   document.getElementById('score').textContent = score;
   document.getElementById('wave').textContent = Math.max(wave, 1);
   document.getElementById('enemies').textContent = enemies.filter(e => e.alive).length + (enemiesToSpawn > 0 ? ' (+' + enemiesToSpawn + ')' : '');
+  document.getElementById('booster-chip').style.display = boosterActive ? 'block' : 'none';
 
   const c = document.getElementById('crosshair');
   c.style.left = mouse.x + 'px';
@@ -940,8 +1348,7 @@ function drawMinimap() {
   const W = 170;
   ctx.clearRect(0, 0, W, W);
   const scale = W / (WORLD_SIZE * 2);
-  const toMap = (x, z) => [ (x + WORLD_SIZE) * scale, (z + WORLD_SIZE) * scale ];
-  ctx.strokeStyle = 'rgba(255,255,255,.25)';
+  const toMap = (x, z) => [(x + WORLD_SIZE) * scale, (z + WORLD_SIZE) * scale];
   for (const o of obstacles) {
     const [mx, mz] = toMap(o.mesh.position.x, o.mesh.position.z);
     ctx.fillStyle = 'rgba(160,160,160,.5)';
@@ -985,15 +1392,15 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-function updateGarageCamera(dt) {
-  garage.orbit += dt * 0.25;
-  const r = 13;
-  camera.position.set(Math.cos(garage.orbit) * r, 5.5, Math.sin(garage.orbit) * r);
-  camera.lookAt(0, 1.4, 0);
-  if (player.alive) player.turret.rotation.y = Math.sin(garage.orbit * 0.6) * 0.6;
+try {
+  init();
+} catch (err) {
+  const l = document.getElementById('loading');
+  if (l) {
+    l.innerHTML = 'Ошибка запуска: ' + (err && err.message ? err.message : err);
+    l.style.color = '#ff9c6e';
+  }
 }
-
-init();
 </script>
 </body>
 </html>
