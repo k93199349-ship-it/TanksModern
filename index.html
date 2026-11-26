@@ -102,6 +102,9 @@
   #btn-mode { margin-top: 0; padding: 14px 18px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
   .mode-dot { width: 8px; height: 8px; border-radius: 50%; background: #37d67a; box-shadow: 0 0 8px #37d67a; flex: 0 0 auto; }
   .tree-wrap { display: flex; flex-direction: column; align-items: center; }
+  .tree-cols { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; width: 100%; }
+  .tree-col { display: flex; flex-direction: column; align-items: center; flex: 1 1 140px; max-width: 220px; }
+  .tree-col-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #f0b93c; border-bottom: 1px solid rgba(240,185,60,.35); padding: 0 12px 4px; margin-bottom: 8px; }
   .tree-node { width: 250px; padding: 12px 16px; border-radius: 10px; background: rgba(8,14,20,.9);
     border: 2px solid rgba(255,255,255,.14); cursor: pointer; text-align: center; transition: border-color .15s; }
   .tree-node:hover { border-color: rgba(255,255,255,.4); }
@@ -310,7 +313,7 @@
   <div class="wave-banner" id="wave-banner">Волна 1 · 6×6</div>
   <div id="crosshair"></div>
   <canvas id="minimap" width="170" height="170"></canvas>
-  <div id="controls-help">WASD — ехать · Мышь — прицел · ЛКМ / Пробел — огонь · Shift — ускорение · E — автоприцел</div>
+  <div id="controls-help">WASD — ехать · Мышь — наводить башню (камера едет за орудием) · Колесо — зум · ЛКМ / Пробел — огонь · Shift — ускорение · E — автоприцел</div>
   <div id="touch-ui" class="hidden">
     <div class="stick" id="stick-move"><div class="knob" id="knob-move"></div></div>
     <div class="stick" id="stick-aim"><div class="knob" id="knob-aim"></div></div>
@@ -423,6 +426,8 @@ let keys = {}, mouse = { x: 0, y: 0, down: false };
 const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
 const touchMove = { x: 0, y: 0 };
 let autoAim = true;
+let camYaw = Math.PI;
+let camDist = 9;
 let earAllyKey = '';
 function toggleAutoAim() {
   autoAim = !autoAim;
@@ -450,14 +455,14 @@ const groundRay = new THREE.Raycaster();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
 const TANKS = [
-  { id: 'scout', name: 'Барс-1М', tier: 1, cost: 0, cls: 'ЛТ', color: 0x2e6f3e, hp: 4, speed: 15, turn: 2.1, reload: 0.9, damage: 1, scale: 0.95, model: 'tank1', desc: 'Стремительный разведчик. Скорость — твоя броня: обходи врагов и бей в борт.' },
-  { id: 'raider', name: 'Овод-Т2', tier: 2, cost: 400, cls: 'ЛТ', color: 0x57683b, hp: 5, speed: 16.5, turn: 2.2, reload: 0.8, damage: 1, scale: 0.9, model: 'tank2', desc: 'Лёгкий хищник с самой быстрой перезарядкой в ветке. Вспышка — и скрылся.' },
-  { id: 'brawler', name: 'Гроза-Р2', tier: 3, cost: 1200, cls: 'СТ', color: 0x3a5a7a, hp: 5, speed: 12, turn: 1.8, reload: 1.1, damage: 2, scale: 1.05, model: 'tank2', desc: 'Средний танк. Золотая середина: уверенный урон и достойная подвижность.' },
-  { id: 'vanguard', name: 'Авангард-44', tier: 4, cost: 2800, cls: 'СТ', color: 0x6b5a3a, hp: 6, speed: 13.5, turn: 1.9, reload: 1.0, damage: 2, scale: 1.1, model: 'tank1', desc: 'Штурмовой средний танк: крепкая башня и точное орудие для прорыва флангов.' },
-  { id: 'heavy', name: 'Молот-9', tier: 5, cost: 5600, cls: 'ТТ', color: 0x5a4a3a, hp: 7, speed: 9.5, turn: 1.5, reload: 1.6, damage: 3, scale: 1.18, model: 'tank4', desc: 'Тяжёлая машина: толстая броня и орудие разрушительной мощи. Медленный, но страшный.' },
-  { id: 'sniper', name: 'Гадюка-ПТ', tier: 6, cost: 10500, cls: 'ПТ', color: 0x3f454d, hp: 6, speed: 8, turn: 1.3, reload: 2.3, damage: 4, scale: 1.08, model: 'tank4', desc: 'Истребитель танков: огромный урон за выстрел. Бей из засады — первый выстрел решает бой.' },
-  { id: 'mbt', name: 'Абрамс-X', tier: 7, cost: 19000, cls: 'ОБТ', color: 0x37424a, hp: 8, speed: 13, turn: 1.9, reload: 1.0, damage: 3, scale: 1.12, model: 'tank3', desc: 'Современный ОБТ: точная стрельба, быстрая перезарядка и живучесть.' },
-  { id: 'juggernaut', name: 'Цитадель', tier: 8, cost: 32000, cls: 'ТТ', color: 0x2f3a33, hp: 12, speed: 8.5, turn: 1.4, reload: 1.7, damage: 4, scale: 1.3, model: 'tank2', desc: 'Вершина ветки: ходовая крепость с чудовищным орудием. Твой последний довод.' }
+  { id: 'scout', name: 'МС-1', tier: 1, cost: 0, cls: 'ЛТ', color: 0x2e6f3e, hp: 4, speed: 15, turn: 2.1, reload: 0.9, damage: 1, scale: 0.95, model: 'tank1', desc: 'Легендарная «малютка» — первый танк в ветке. Юркий и цепкий, идеален для первых боёв.' },
+  { id: 'raider', name: 'БТ-7', tier: 2, cost: 400, cls: 'ЛТ', color: 0x57683b, hp: 5, speed: 16.5, turn: 2.2, reload: 0.8, damage: 1, scale: 0.9, model: 'tank2', desc: 'Скоростной БТ-7 на колёсно-гусеничном ходу. Молниеносные рейды по флангам — и скрылся.' },
+  { id: 'brawler', name: 'Т-28', tier: 3, cost: 1200, cls: 'СТ', color: 0x3a5a7a, hp: 5, speed: 12, turn: 1.8, reload: 1.1, damage: 2, scale: 1.05, model: 'tank2', desc: 'Средний танк сопровождения пехоты. Золотая середина: уверенный урон и достойная подвижность.' },
+  { id: 'vanguard', name: 'Т-34', tier: 4, cost: 2800, cls: 'СТ', color: 0x6b5a3a, hp: 6, speed: 13.5, turn: 1.9, reload: 1.0, damage: 2, scale: 1.1, model: 'tank1', desc: 'Легендарная «тридцатьчетвёрка»: наклонная броня и точное орудие — эталон среднего танка.' },
+  { id: 'heavy', name: 'КВ-1', tier: 5, cost: 5600, cls: 'ТТ', color: 0x5a4a3a, hp: 7, speed: 9.5, turn: 1.5, reload: 1.6, damage: 3, scale: 1.18, model: 'tank4', desc: 'Тяжёлый КВ-1: толстая броня и орудие разрушительной мощи. Медленный, но страшный.' },
+  { id: 'sniper', name: 'СУ-100', tier: 6, cost: 10500, cls: 'ПТ', color: 0x3f454d, hp: 6, speed: 8, turn: 1.3, reload: 2.3, damage: 4, scale: 1.08, model: 'tank4', desc: 'Истребитель танков СУ-100: огромный урон за выстрел. Бей из засады — первый выстрел решает бой.' },
+  { id: 'mbt', name: 'Т-62А', tier: 7, cost: 19000, cls: 'ОБТ', color: 0x37424a, hp: 8, speed: 13, turn: 1.9, reload: 1.0, damage: 3, scale: 1.12, model: 'tank3', desc: 'Вершина средних: гладкоствольное орудие и точная стрельба на любой дистанции.' },
+  { id: 'juggernaut', name: 'ИС-7', tier: 8, cost: 32000, cls: 'ТТ', color: 0x2f3a33, hp: 12, speed: 8.5, turn: 1.4, reload: 1.7, damage: 4, scale: 1.3, model: 'tank2', desc: 'Вершина ветки: знаменитый ИС-7 с мощнейшим орудием и рикошетной бронёй. Твой последний довод.' }
 ];
 
 const SKINS = [
@@ -580,6 +585,8 @@ function init() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.06;
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b0f14);
@@ -620,6 +627,7 @@ function init() {
   addEventListener('mouseup', e => { if (e.button === 0) { mouse.down = false; garageCam.dragging = false; } });
   addEventListener('wheel', e => {
     if (state === 'garage') garageCam.dist = clamp(garageCam.dist + e.deltaY * 0.01, 7, 20);
+    else if (state === 'playing') camDist = clamp(camDist + e.deltaY * 0.01, 6, 16);
   }, { passive: true });
   addEventListener('contextmenu', e => e.preventDefault());
 
@@ -747,7 +755,7 @@ function loadMapTex(key, rx, ry) {
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(rx, ry);
-  tex.anisotropy = 4;
+  tex.anisotropy = 8;
   mapTexCache[ck] = tex;
   return tex;
 }
@@ -772,7 +780,7 @@ function buildWorld() {
     g.fillStyle = 'rgb(' + (shade - 10) + ',' + shade + ',' + (shade - 34) + ')';
     g.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
   }
-  const grassTex = loadMapTex('grass', 48, 48);
+  const grassTex = loadMapTex('grass', 72, 72);
   const groundTex = grassTex || new THREE.CanvasTexture(groundCanvas);
   if (!grassTex) {
     groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
@@ -816,8 +824,10 @@ function findClearSpot(r, pad = 20) {
 }
 
 function addRoads() {
-  const dirtRoadTex = loadMapTex('dirt', 6, 6);
+  const dirtRoadTex = loadMapTex('dirt', 2, 40);
+  const dirtCrossTex = loadMapTex('dirt', 40, 2);
   const roadMat = new THREE.MeshStandardMaterial(dirtRoadTex ? { map: dirtRoadTex, roughness: 1 } : { color: 0x4a463d, roughness: 1 });
+  const crossMat = dirtCrossTex ? new THREE.MeshStandardMaterial({ map: dirtCrossTex, roughness: 1 }) : roadMat;
   for (const rx of [-60, 60]) {
     const road = new THREE.Mesh(new THREE.PlaneGeometry(14, WORLD_SIZE * 2), roadMat);
     road.rotation.x = -Math.PI / 2;
@@ -825,7 +835,7 @@ function addRoads() {
     road.receiveShadow = true;
     scene.add(road);
   }
-  const cross = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_SIZE * 2, 12), roadMat);
+  const cross = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_SIZE * 2, 12), crossMat);
   cross.rotation.x = -Math.PI / 2;
   cross.position.y = 0.02;
   cross.receiveShadow = true;
@@ -1222,6 +1232,40 @@ function parseTankGLB(key) {
   return { prims, turretPos, gunPos, muzzlePos, bbox: bb };
 }
 
+const camoCache = {};
+function camoTexture(cls) {
+  const key = cls || '\u0421\u0422';
+  if (camoCache[key]) return camoCache[key];
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const g = c.getContext('2d');
+  const pals = {
+    '\u041b\u0422': ['#7d8a5c', '#5d6a42', '#99a37a'],
+    '\u0421\u0422': ['#6e7a54', '#4f5a3a', '#8a9468'],
+    '\u0422\u0422': ['#6b6f56', '#4a4e3c', '#878b6c'],
+    '\u041f\u0422': ['#61665c', '#43474a', '#7b8076'],
+    '\u041e\u0411\u0422': ['#73796a', '#535950', '#8f957f']
+  };
+  const pal = pals[key] || pals['\u0421\u0422'];
+  g.fillStyle = pal[0];
+  g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 70; i++) {
+    g.fillStyle = Math.random() < 0.5 ? pal[1] : pal[2];
+    g.beginPath();
+    g.ellipse(Math.random() * 256, Math.random() * 256, 8 + Math.random() * 26, 6 + Math.random() * 18, Math.random() * Math.PI, 0, Math.PI * 2);
+    g.fill();
+  }
+  for (let i = 0; i < 1400; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(20,24,16,0.12)' : 'rgba(214,218,196,0.1)';
+    g.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  camoCache[key] = tex;
+  return tex;
+}
+
 function buildTankModel(cfg) {
   try {
     const key = cfg.model;
@@ -1235,19 +1279,22 @@ function buildTankModel(cfg) {
 
     const tint = new THREE.Color(cfg.color || 0xffffff);
     const tintAmt = cfg.tint !== undefined ? cfg.tint : 0.15;
-    const mkMat = (p) => {
+    const mkMat = (p, camo) => {
       const m = new THREE.MeshStandardMaterial({
         color: new THREE.Color(p.color[0], p.color[1], p.color[2]),
         metalness: cfg.metal !== undefined ? (p.metal + cfg.metal) / 2 : p.metal,
         roughness: p.rough,
         vertexColors: p.vc
       });
-      if (tintAmt > 0) m.color.lerp(tint, tintAmt);
+      if (camo) {
+        m.map = camoTexture(cfg.cls || '\u0421\u0422');
+        m.roughness = Math.min(0.95, p.rough + 0.18);
+      } else if (tintAmt > 0) m.color.lerp(tint, tintAmt);
       return m;
     };
-    const addPrims = (list, parent) => {
+    const addPrims = (list, parent, camo) => {
       for (const p of list) {
-        const mesh = new THREE.Mesh(p.geo, mkMat(p));
+        const mesh = new THREE.Mesh(p.geo, mkMat(p, camo));
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         parent.add(mesh);
@@ -1255,12 +1302,29 @@ function buildTankModel(cfg) {
     };
 
     const root = new THREE.Group();
-    addPrims(cache.prims.hull, root);
+    addPrims(cache.prims.hull, root, true);
+
+    const bl = cache.bbox.max[2] - cache.bbox.min[2];
+    const bw = cache.bbox.max[0] - cache.bbox.min[0];
+    const drumMat = new THREE.MeshStandardMaterial({ color: 0x545a44, roughness: 0.55, metalness: 0.45 });
+    for (const ddx of [-bw * 0.24, bw * 0.24]) {
+      const drum = new THREE.Mesh(new THREE.CylinderGeometry(bl * 0.05, bl * 0.05, bl * 0.15, 10), drumMat);
+      drum.rotation.x = Math.PI / 2;
+      drum.position.set(ddx, cache.bbox.max[1] * 0.45, cache.bbox.min[2] + bl * 0.09);
+      drum.castShadow = true;
+      root.add(drum);
+    }
+    const antenna = new THREE.Mesh(
+      new THREE.CylinderGeometry(bl * 0.012, bl * 0.008, bl * 0.55, 5),
+      new THREE.MeshStandardMaterial({ color: 0x1e211c, roughness: 0.85 })
+    );
+    antenna.position.set(bw * 0.32, cache.bbox.max[1] + bl * 0.18, cache.bbox.max[2] - bl * 0.1);
+    root.add(antenna);
 
     const turret = new THREE.Group();
     turret.position.fromArray(cache.turretPos);
     root.add(turret);
-    addPrims(cache.prims.turret, turret);
+    addPrims(cache.prims.turret, turret, true);
 
     let gun = turret, muzzle = turret;
     if (cache.prims.gun.length) {
@@ -1772,18 +1836,27 @@ function renderGarage() {
 
 function renderTree() {
   const panel = document.getElementById('panel-tree');
-  let html = '<div class="tree-wrap">';
-  TANKS.forEach((t, i) => {
-    const owned = garage.unlocked.includes(t.id);
-    const prevOwned = i === 0 || garage.unlocked.includes(TANKS[i - 1].id);
-    if (i > 0) html += '<div class="tree-arrow">▼</div>';
-    html += '<div class="tree-node' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked') + '" data-tank="' + t.id + '">' +
-      '<div class="slot-top" style="justify-content:center"><span class="slot-tier">Ур. ' + t.tier + ' · ' + (t.cls || 'ЛТ') + '</span></div>' +
-      '<div class="tank-name">' + t.name + '</div>' +
-      '<div class="tank-cost' + (owned ? ' owned' : '') + '">' + (owned ? '✓ Исследован' : (prevOwned ? '⬤ ' + t.cost + ' — купить' : '🔒 Исследуй «' + TANKS[i - 1].name + '»')) + '</div>' +
-      (owned || !prevOwned ? '' : '<button class="btn small" data-buy="' + t.id + '"' + (garage.credits < t.cost ? ' disabled' : '') + '>Купить</button>') +
-      '</div>';
-  });
+  const treeOrder = ['ЛТ', 'СТ', 'ТТ', 'ПТ', 'ОБТ'];
+  let html = '<div class="tree-cols">';
+  for (const cls of treeOrder) {
+    const col = TANKS.filter(t => (t.cls || 'ЛТ') === cls);
+    if (!col.length) continue;
+    html += '<div class="tree-col"><div class="tree-col-title">' + cls + '</div>';
+    col.forEach((t, j) => {
+      const i = TANKS.indexOf(t);
+      const owned = garage.unlocked.includes(t.id);
+      const prevOwned = i === 0 || garage.unlocked.includes(TANKS[i - 1].id);
+      if (j > 0) html += '<div class="tree-arrow">▼</div>';
+      const need = i > 0 ? TANKS[i - 1].name : '';
+      html += '<div class="tree-node' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked') + '" data-tank="' + t.id + '">' +
+        '<div class="slot-top" style="justify-content:center"><span class="slot-tier">Ур. ' + t.tier + '</span></div>' +
+        '<div class="tank-name">' + t.name + '</div>' +
+        '<div class="tank-cost' + (owned ? ' owned' : '') + '">' + (owned ? '✓ В ангаре' : (prevOwned ? '⬤ ' + t.cost + ' — купить' : '🔒 Исследуй «' + need + '»')) + '</div>' +
+        (owned || !prevOwned ? '' : '<button class="btn small" data-buy="' + t.id + '"' + (garage.credits < t.cost ? ' disabled' : '') + '>Купить</button>') +
+        '</div>';
+    });
+    html += '</div>';
+  }
   html += '</div>';
   panel.innerHTML = html;
   for (const node of panel.querySelectorAll('.tree-node')) {
@@ -1966,6 +2039,8 @@ function startGame() {
   player.barrelKick = 0;
   player.group.position.set(0, 0, ALLY_BASE_Z - 12);
   player.heading = Math.PI;
+  camYaw = Math.PI;
+  touchAim.angle = Math.PI;
   player.group.rotation.y = player.heading;
   player.body.rotation.set(0, 0, 0);
   player.turret.rotation.y = 0;
@@ -2457,18 +2532,26 @@ function updateWaves(dt) {
 }
 
 function updateCamera(dt) {
-  const back = new THREE.Vector3(Math.sin(player.heading), 0, Math.cos(player.heading));
-  const desired = player.group.position.clone()
-    .addScaledVector(back, -13)
-    .add(new THREE.Vector3(0, 8.5, 0));
-  camera.position.lerp(desired, Math.min(1, dt * 3.5));
+  const pos = player.group.position;
+  const turretWorld = (aimPoint && state === 'playing' && player.alive)
+    ? Math.atan2(aimPoint.x - pos.x, aimPoint.z - pos.z)
+    : player.heading;
+  let yawDiff = turretWorld - camYaw;
+  while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
+  while (yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+  camYaw += yawDiff * Math.min(1, dt * 3.2);
+  const fwd = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
+  const desired = pos.clone()
+    .addScaledVector(fwd, -camDist)
+    .add(new THREE.Vector3(0, camDist * 0.52, 0));
+  camera.position.lerp(desired, Math.min(1, dt * 6));
   if (shakeAmount > 0.001 && garage.settings.shake) {
     camera.position.x += rand(-1, 1) * shakeAmount;
     camera.position.y += rand(-1, 1) * shakeAmount * 0.6;
     camera.position.z += rand(-1, 1) * shakeAmount;
     shakeAmount *= Math.pow(0.001, dt);
   }
-  const look = player.group.position.clone().addScaledVector(back, 8).setY(1.5);
+  const look = pos.clone().addScaledVector(fwd, 10).setY(1.8);
   camera.lookAt(look);
 }
 
@@ -2589,7 +2672,8 @@ function drawMinimap() {
     ctx.fill();
   }
   const [px, pz] = toMap(player.group.position.x, player.group.position.z);
-  const mAng = Math.atan2(Math.cos(player.heading), Math.sin(player.heading));
+  const turretWorld = player.heading + player.turret.rotation.y;
+  const mAng = Math.atan2(Math.cos(turretWorld), Math.sin(turretWorld));
   ctx.fillStyle = 'rgba(255,255,255,.14)';
   ctx.beginPath();
   ctx.moveTo(px, pz);
