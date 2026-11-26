@@ -378,6 +378,28 @@
     pointer-events: auto; touch-action: none; }
   #btn-scope.on { border-color: #ffd166; background: rgba(255,209,102,.3); box-shadow: 0 0 12px rgba(255,209,102,.5); }
   @media (orientation: landscape) and (max-height: 540px) { #btn-scope { right: 16px; bottom: 106px; width: 54px; height: 54px; font-size: 22px; } }
+  #btn-ammo { position: absolute; left: 14px; bottom: 200px; pointer-events: auto; padding: 10px 14px; border-radius: 10px;
+    background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.22); color: #cfe6f2; font-weight: 700; font-size: 13px; cursor: pointer; }
+  #btn-ammo b { color: #ffd166; margin-left: 4px; }
+  #ammo-panel { position: absolute; left: 14px; bottom: 246px; pointer-events: auto; display: flex; flex-direction: column; gap: 6px;
+    width: 250px; max-height: 46vh; overflow-y: auto; }
+  #ammo-panel.hidden { display: none; }
+  .ammo-row { padding: 8px 10px; border-radius: 8px; background: rgba(8,14,20,.92); border: 1px solid rgba(255,255,255,.16); cursor: pointer; }
+  .ammo-row:hover { border-color: rgba(255,255,255,.4); }
+  .ammo-row.sel { border-color: #ffd166; box-shadow: 0 0 10px rgba(255,209,102,.35); }
+  .ammo-name { font-weight: 900; color: #ffd166; margin-right: 8px; }
+  .ammo-full { font-size: 12px; color: #cfe6f2; }
+  .ammo-stat { float: right; font-size: 11px; color: #37d67a; font-weight: 700; }
+  .ammo-desc { font-size: 11px; color: #9fb3c0; margin-top: 3px; line-height: 1.4; }
+  .tree-nation { font-size: 16px; font-weight: 800; color: #ffd166; letter-spacing: 2px; margin: 12px 0 6px; text-transform: uppercase; }
+  @media (orientation: landscape) and (max-height: 540px) {
+    #btn-ammo { bottom: 140px; padding: 6px 10px; font-size: 11px; }
+    #ammo-panel { bottom: 178px; width: 210px; }
+  }
+  @media (orientation: portrait) and (max-width: 560px) {
+    #btn-ammo { bottom: 224px; }
+    #ammo-panel { bottom: 268px; width: 200px; }
+  }
 </style>
 </head>
 <body>
@@ -414,6 +436,8 @@
   <div id="reload-ring"></div>
   <div id="dmg-float"></div>
   <div id="aim-dist"></div>
+  <button id="btn-ammo">Снаряды: <b id="ammo-cur">ББ</b></button>
+  <div id="ammo-panel" class="hidden"></div>
   <div class="wave-banner" id="wave-banner">Волна 1 · 6×6</div>
   <div id="crosshair"></div>
   <canvas id="minimap" width="170" height="170"></canvas>
@@ -601,9 +625,35 @@ const TANKS = [
   { id: 'heavy', name: 'КВ-1', tier: 5, cost: 5600, cls: 'ТТ', color: 0x5a4a3a, hp: 7, speed: 9.5, turn: 1.5, reload: 1.6, damage: 3, scale: 1.18, model: 'tank4', desc: 'Тяжёлый КВ-1: толстая броня и орудие разрушительной мощи. Медленный, но страшный.' },
   { id: 'sniper', name: 'СУ-100', tier: 6, cost: 10500, cls: 'ПТ', color: 0x3f454d, hp: 6, speed: 8, turn: 1.3, reload: 2.3, damage: 4, scale: 1.08, model: 'tank4', desc: 'Истребитель танков СУ-100: огромный урон за выстрел. Бей из засады — первый выстрел решает бой.' },
   { id: 'mbt', name: 'Т-62А', tier: 7, cost: 19000, cls: 'ОБТ', color: 0x37424a, hp: 8, speed: 13, turn: 1.9, reload: 1.0, damage: 3, scale: 1.12, model: 'tank3', desc: 'Вершина средних: гладкоствольное орудие и точная стрельба на любой дистанции.' },
-  { id: 'juggernaut', name: 'ИС-7', tier: 8, cost: 32000, cls: 'ТТ', color: 0x2f3a33, hp: 12, speed: 8.5, turn: 1.4, reload: 1.7, damage: 4, scale: 1.3, model: 'tank2', desc: 'Вершина ветки: знаменитый ИС-7 с мощнейшим орудием и рикошетной бронёй. Твой последний довод.' }
+  { id: 'juggernaut', name: 'ИС-7', tier: 8, cost: 32000, cls: 'ТТ', color: 0x2f3a33, hp: 12, speed: 8.5, turn: 1.4, reload: 1.7, damage: 4, scale: 1.3, model: 'tank2', desc: 'Вершина ветки: знаменитый ИС-7 с мощнейшим орудием и рикошетной бронёй. Твой последний довод.' },
+  { id: 'it1', name: 'ИТ-1 «Дракон»', tier: 7, cost: 22000, cls: 'ПТ', nation: 'СССР', prev: 'sniper', color: 0x37424a, hp: 7, speed: 11, turn: 1.6, reload: 2.4, damage: 3, scale: 1.1, model: 'tank3', rockets: true, desc: 'Ракетный истребитель танков. Стреляет управляемыми ракетами ПКР — наводятся на цель сами.' },
+  { id: 'pz35', name: 'Pz. 35(t)', tier: 1, cost: 300, cls: 'ЛТ', nation: 'Германия', prev: null, color: 0x566066, hp: 4, speed: 14, turn: 2.1, reload: 0.9, damage: 1, scale: 0.95, model: 'tank1', desc: 'Начало немецкой ветки. Лёгкая чешская машина вермахта — юркая и точная.' },
+  { id: 'luchs', name: 'Pz. II «Лухс»', tier: 2, cost: 500, cls: 'ЛТ', nation: 'Германия', prev: 'pz35', color: 0x5d665e, hp: 4, speed: 16.5, turn: 2.3, reload: 0.75, damage: 1, scale: 0.92, model: 'tank2', desc: '«Рысь» — разведчик с отличной подвижностью. Король флангов на низких уровнях.' },
+  { id: 'pziii', name: 'Pz. III', tier: 3, cost: 1250, cls: 'СТ', nation: 'Германия', prev: 'pz35', color: 0x4f5860, hp: 5, speed: 12.5, turn: 1.9, reload: 1.0, damage: 2, scale: 1.02, model: 'tank2', desc: 'Рабочая лошадка панцерваффе. Надёжное орудие и крепкая компоновка.' },
+  { id: 'pziv', name: 'Pz. IV', tier: 4, cost: 2900, cls: 'СТ', nation: 'Германия', prev: 'pz35', color: 0x8a7a4a, hp: 6, speed: 12, turn: 1.7, reload: 1.15, damage: 2, scale: 1.1, model: 'tank4', desc: 'Универсальный средний танк в пустынном камуфляже. Хорош на любой дистанции.' },
+  { id: 'panther', name: '«Пантера»', tier: 5, cost: 6200, cls: 'СТ', nation: 'Германия', prev: 'pz35', color: 0x4a5158, hp: 7, speed: 13.5, turn: 1.8, reload: 1.0, damage: 3, scale: 1.15, model: 'tank1', desc: 'Эталонный средний танк: мощная пушка KwK 42 и рикошетная лобовая броня.' },
+  { id: 'tiger', name: '«Тигр»', tier: 6, cost: 10500, cls: 'ТТ', nation: 'Германия', prev: 'pz35', color: 0x6b6b57, hp: 8, speed: 10, turn: 1.5, reload: 1.6, damage: 3, scale: 1.2, model: 'tank2', desc: 'Легендарный Tiger с 88-мм орудием. Страх союзников на всех фронтах.' },
+  { id: 'tiger2', name: '«Тигр II»', tier: 7, cost: 20000, cls: 'ТТ', nation: 'Германия', prev: 'pz35', color: 0x4f5860, hp: 10, speed: 9.5, turn: 1.4, reload: 1.7, damage: 4, scale: 1.25, model: 'tank4', desc: '«Королевский тигр» — толстая броня и длинноствольная пушка. Тяжёлый и опасный.' },
+  { id: 'maus', name: '«Маус»', tier: 8, cost: 34000, cls: 'ТТ', nation: 'Германия', prev: 'pz35', color: 0x3f464d, hp: 14, speed: 6.5, turn: 1.1, reload: 1.9, damage: 4, scale: 1.35, model: 'tank2', desc: 'Самый тяжёлый танк в истории — 188 тонн брони. Медленная неприступная крепость.' },
+  { id: 'hetzer', name: '«Хетцер»', tier: 4, cost: 2700, cls: 'ПТ', nation: 'Германия', prev: 'pz35', color: 0x5d665e, hp: 5, speed: 9, turn: 1.4, reload: 1.9, damage: 3, scale: 1.0, model: 'tank4', desc: 'Компактный засадный ПТ. Низкий силуэт и злобное орудие из укрытия.' },
+  { id: 'jagdpanther', name: '«Ягдпантера»', tier: 6, cost: 11000, cls: 'ПТ', nation: 'Германия', prev: 'pz35', color: 0x8a7a4a, hp: 6, speed: 11, turn: 1.4, reload: 2.2, damage: 4, scale: 1.1, model: 'tank2', desc: 'Охотник на базе «Пантеры»: скорострельная пушка и наклонная броня рубки.' },
+  { id: 'jagdtiger', name: '«Ягдтигр»', tier: 7, cost: 21000, cls: 'ПТ', nation: 'Германия', prev: 'pz35', color: 0x4a5158, hp: 8, speed: 7, turn: 1.1, reload: 2.8, damage: 5, scale: 1.2, model: 'tank4', desc: '128-мм орудие пробивает всё. Самая тяжёлая пушка на мобильном шасси.' }
 ];
 
+const AMMO = [
+  { id: 'ap', name: 'ББ', full: 'Бронебойный', dmg: 1.0, spd: 55, spread: 1.0, rl: 1.0, color: 0xffd166, desc: 'Стандартный снаряд. Точный и надёжный в любом бою.' },
+  { id: 'apcr', name: 'БП', full: 'Подкалиберный', dmg: 0.85, spd: 78, spread: 0.5, rl: 0.95, color: 0xa0e8ff, desc: 'Летит быстрее всех и почти не разбрасывается. Урон чуть ниже.' },
+  { id: 'heat', name: 'КС', full: 'Кумулятивный', dmg: 1.15, spd: 46, spread: 1.3, rl: 1.1, color: 0xffa060, desc: 'Кумулятивная струя прошивает броню. Больше урона, меньше скорость.' },
+  { id: 'he', name: 'ОФ', full: 'Осколочно-фугасный', dmg: 1.35, spd: 40, spread: 1.6, rl: 1.15, color: 0xff8080, desc: 'Фугас: максимум урона и осколки задевают соседей цели. Большой взрыв.' },
+  { id: 'rk', name: 'ПКР', full: 'Управляемая ракета', dmg: 1.9, spd: 26, spread: 0.3, rl: 2.2, color: 0xc0ff9a, desc: 'Ракета с наведением на цель. Только для ракетных танков (ИТ-1).' }
+];
+
+function prevTankOf(t) {
+  if (t.prev === null) return null;
+  if (t.prev) return TANKS.find(x => x.id === t.prev) || null;
+  const i = TANKS.indexOf(t);
+  return i > 0 ? TANKS[i - 1] : null;
+}
 const SKINS = [
   { id: 'forest', name: 'Лесной',      color: 0x4a5d3a, rarity: 'common', metal: 0.1 },
   { id: 'desert', name: 'Пустынный',   color: 0xbfa46f, rarity: 'common', metal: 0.1 },
@@ -758,7 +808,7 @@ function init() {
 
   clock = new THREE.Clock();
   addEventListener('resize', onResize);
-  addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); if (e.code === 'KeyE') toggleAutoAim(); if (e.code === 'KeyZ') toggleSniper(); });
+  addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); if (e.code === 'KeyE') toggleAutoAim(); if (e.code === 'KeyZ') toggleSniper(); if (e.code === 'KeyQ') cycleAmmo(); });
   addEventListener('keyup', e => { keys[e.code] = false; });
   addEventListener('mousemove', onMouseMove);
   addEventListener('mousedown', e => {
@@ -787,6 +837,11 @@ function init() {
   btnAuto.classList.toggle('on', autoAim);
   btnAuto.addEventListener('click', toggleAutoAim);
   document.getElementById('btn-scope').addEventListener('click', toggleSniper);
+  document.getElementById('btn-ammo').addEventListener('click', () => {
+    const p = document.getElementById('ammo-panel');
+    p.classList.toggle('hidden');
+    if (!p.classList.contains('hidden')) renderAmmoPanel();
+  });
   document.getElementById('btn-back').addEventListener('click', () => switchTab('tanks'));
   document.getElementById('cur-credits').addEventListener('click', () => { document.getElementById('cur-modal').classList.remove('hidden'); renderCurModal('credits'); });
   document.getElementById('cur-gold').addEventListener('click', () => { document.getElementById('cur-modal').classList.remove('hidden'); renderCurModal('xp'); });
@@ -1901,7 +1956,8 @@ function toggleTab(tab) { switchTab(currentTab === tab ? 'tanks' : tab); }
 function buyTank(id) {
   const idx = TANKS.findIndex(t => t.id === id);
   const cfg = TANKS[idx];
-  const prevOk = idx <= 0 || garage.unlocked.includes(TANKS[idx - 1].id);
+  const prevT = prevTankOf(cfg);
+  const prevOk = !prevT || garage.unlocked.includes(prevT.id);
   if (prevOk && !garage.unlocked.includes(id) && garage.credits >= cfg.cost) {
     garage.credits -= cfg.cost;
     garage.unlocked.push(id);
@@ -2063,12 +2119,12 @@ function renderGarage() {
     bar('Перезарядка', cfg.reload.toFixed(1) + ' с', 2, '') +
     (owned ? '' : '<div class="tank-cost" style="margin-top:6px">Цена: ⬤ ' + cfg.cost + '</div>');
 
-  const tankIdx = TANKS.indexOf(cfg);
-  const prevOwned = tankIdx <= 0 || garage.unlocked.includes(TANKS[tankIdx - 1].id);
+  const prevT = prevTankOf(cfg);
+  const prevOwned = !prevT || garage.unlocked.includes(prevT.id);
   const btnBuy = document.getElementById('btn-buy');
   btnBuy.style.display = owned ? 'none' : '';
   if (!prevOwned) {
-    btnBuy.textContent = '🔒 Сначала исследуй «' + TANKS[tankIdx - 1].name + '»';
+    btnBuy.textContent = '🔒 Сначала исследуй «' + prevT.name + '»';
     btnBuy.disabled = true;
   } else {
     btnBuy.textContent = garage.credits >= cfg.cost ? 'Купить за ⬤ ' + cfg.cost : 'Не хватает ⬤ ' + (cfg.cost - garage.credits);
@@ -2203,27 +2259,33 @@ function renderGarage() {
 function renderTree() {
   const panel = document.getElementById('panel-tree');
   const treeOrder = ['ЛТ', 'СТ', 'ТТ', 'ПТ', 'ОБТ'];
-  let html = '<div class="tree-cols">';
-  for (const cls of treeOrder) {
-    const col = TANKS.filter(t => (t.cls || 'ЛТ') === cls);
-    if (!col.length) continue;
-    html += '<div class="tree-col"><div class="tree-col-title">' + cls + '</div>';
-    col.forEach((t, j) => {
-      const i = TANKS.indexOf(t);
-      const owned = garage.unlocked.includes(t.id);
-      const prevOwned = i === 0 || garage.unlocked.includes(TANKS[i - 1].id);
-      if (j > 0) html += '<div class="tree-arrow">▼</div>';
-      const need = i > 0 ? TANKS[i - 1].name : '';
-      html += '<div class="tree-node' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked') + '" data-tank="' + t.id + '">' +
-        '<div class="slot-top" style="justify-content:center"><span class="slot-tier">Ур. ' + t.tier + '</span></div>' +
-        '<div class="tank-name">' + t.name + '</div>' +
-        '<div class="tank-cost' + (owned ? ' owned' : '') + '">' + (owned ? '✓ В ангаре' : (prevOwned ? '⬤ ' + t.cost + ' — купить' : '🔒 Исследуй «' + need + '»')) + '</div>' +
-        (owned || !prevOwned ? '' : '<button class="btn small" data-buy="' + t.id + '"' + (garage.credits < t.cost ? ' disabled' : '') + '>Купить</button>') +
-        '</div>';
-    });
+  const nations = ['СССР', 'Германия'];
+  let html = '';
+  for (const nat of nations) {
+    if (!TANKS.some(t => (t.nation || 'СССР') === nat)) continue;
+    html += '<div class="tree-nation">' + (nat === 'Германия' ? '⚔ Германия' : '★ СССР') + '</div>';
+    html += '<div class="tree-cols">';
+    for (const cls of treeOrder) {
+      const col = TANKS.filter(t => (t.nation || 'СССР') === nat && (t.cls || 'ЛТ') === cls);
+      if (!col.length) continue;
+      html += '<div class="tree-col"><div class="tree-col-title">' + cls + '</div>';
+      col.forEach((t, j) => {
+        const owned = garage.unlocked.includes(t.id);
+        const prevT = prevTankOf(t);
+        const prevOwned = !prevT || garage.unlocked.includes(prevT.id);
+        if (j > 0) html += '<div class="tree-arrow">▼</div>';
+        const need = prevT ? prevT.name : '';
+        html += '<div class="tree-node' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked') + '" data-tank="' + t.id + '">' +
+          '<div class="slot-top" style="justify-content:center"><span class="slot-tier">Ур. ' + t.tier + '</span></div>' +
+          '<div class="tank-name">' + t.name + '</div>' +
+          '<div class="tank-cost' + (owned ? ' owned' : '') + '">' + (owned ? '✓ В ангаре' : (prevOwned ? '⬤ ' + t.cost + ' — купить' : '🔒 Исследуй «' + need + '»')) + '</div>' +
+          (owned || !prevOwned ? '' : '<button class="btn small" data-buy="' + t.id + '"' + (garage.credits < t.cost ? ' disabled' : '') + '>Купить</button>') +
+          '</div>';
+      });
+      html += '</div>';
+    }
     html += '</div>';
   }
-  html += '</div>';
   panel.innerHTML = html;
   for (const node of panel.querySelectorAll('.tree-node')) {
     node.addEventListener('click', e => {
@@ -2377,6 +2439,7 @@ function enterGarage() {
   sniper = false;
   document.getElementById('scope').classList.add('hidden');
   document.getElementById('btn-scope').classList.remove('on');
+  document.getElementById('ammo-panel').classList.add('hidden');
   hangar.visible = true;
   sunLight.visible = false;
   hemiLight.intensity = 0.25;
@@ -2485,28 +2548,77 @@ function plural(n, forms) {
   return forms[2];
 }
 
+function currentAmmo(tank) {
+  if (!tank.isPlayer) return AMMO[0];
+  const cfg = getTankCfg(garage.selected);
+  let a = AMMO.find(x => x.id === garage.ammoSel) || AMMO[0];
+  if (a.id === 'rk' && !cfg.rockets) a = AMMO[0];
+  return a;
+}
+
+function cycleAmmo() {
+  if (state !== 'playing' || !player.alive) return;
+  const cfg = getTankCfg(garage.selected);
+  const list = AMMO.filter(a => a.id !== 'rk' || cfg.rockets);
+  const i = list.findIndex(a => a.id === (garage.ammoSel || 'ap'));
+  garage.ammoSel = list[(i + 1) % list.length].id;
+  saveGarage();
+  renderAmmoPanel();
+  const el = document.getElementById('ammo-panel');
+  el.classList.remove('hidden');
+  clearTimeout(cycleAmmo._t);
+  cycleAmmo._t = setTimeout(() => el.classList.add('hidden'), 1300);
+}
+
+function renderAmmoPanel() {
+  const cfg = getTankCfg(garage.selected);
+  const list = AMMO.filter(a => a.id !== 'rk' || cfg.rockets);
+  if (!list.some(a => a.id === (garage.ammoSel || 'ap'))) garage.ammoSel = 'ap';
+  const el = document.getElementById('ammo-panel');
+  el.innerHTML = list.map(a =>
+    '<div class="ammo-row' + (garage.ammoSel === a.id ? ' sel' : '') + '" data-ammo="' + a.id + '">' +
+    '<span class="ammo-name">' + a.name + '</span><span class="ammo-full">' + a.full + '</span>' +
+    '<span class="ammo-stat">Урон ×' + a.dmg + '</span>' +
+    '<div class="ammo-desc">' + a.desc + '</div></div>').join('');
+  for (const row of el.querySelectorAll('.ammo-row')) {
+    row.addEventListener('click', () => {
+      garage.ammoSel = row.getAttribute('data-ammo');
+      saveGarage();
+      renderAmmoPanel();
+      playSound('hit', 0.4);
+    });
+  }
+}
+
 function fire(tank) {
   if (tank.reload > 0 || !tank.alive) return;
-  tank.reload = tank.reloadTime;
-  tank.barrelKick = 0.45;
+  const ammo = currentAmmo(tank);
+  tank.reload = tank.reloadTime * (ammo.rl || 1);
+  tank.barrelKick = ammo.id === 'rk' ? 0.7 : 0.45;
 
   const muzzlePos = new THREE.Vector3();
   tank.muzzle.getWorldPosition(muzzlePos);
   const dir = new THREE.Vector3();
   tank.pitch.getWorldDirection(dir);
 
-  const spread = tank.isPlayer ? 0.006 : 0.035;
+  const spread = (tank.isPlayer ? 0.006 : 0.035) * ammo.spread;
   dir.x += rand(-spread, spread);
   dir.z += rand(-spread, spread);
   dir.normalize();
 
+  const isRk = ammo.id === 'rk';
   const shell = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.13, 0.5, 4, 8),
-    new THREE.MeshStandardMaterial({ color: tank.team === 'ally' ? 0xffd166 : 0xff6b6b, emissive: tank.team === 'ally' ? 0x704d00 : 0x661111, emissiveIntensity: 2 })
+    isRk ? new THREE.CapsuleGeometry(0.17, 0.95, 4, 8) : new THREE.CapsuleGeometry(0.13, 0.5, 4, 8),
+    new THREE.MeshStandardMaterial({
+      color: tank.isPlayer ? ammo.color : (tank.team === 'ally' ? 0xffd166 : 0xff6b6b),
+      emissive: tank.isPlayer ? ammo.color : (tank.team === 'ally' ? 0x704d00 : 0x661111),
+      emissiveIntensity: 2 })
   );
   shell.position.copy(muzzlePos);
   scene.add(shell);
-  shells.push({ mesh: shell, vel: dir.multiplyScalar(55), owner: tank, life: 4, damage: tank.damage });
+  shells.push({ mesh: shell, vel: dir.multiplyScalar(ammo.spd), owner: tank, life: isRk ? 7 : 4,
+    damage: Math.max(1, Math.round(tank.damage * ammo.dmg)), ammo,
+    locked: isRk && tank.isPlayer ? nearestEnemy(tank) : null });
 
   const flash = new THREE.Mesh(
     new THREE.SphereGeometry(0.55, 8, 8),
@@ -2801,7 +2913,20 @@ function updateShells(dt) {
     }
 
     let dead = s.life <= 0 || Math.abs(s.mesh.position.x) > WORLD_SIZE + 4 || Math.abs(s.mesh.position.z) > WORLD_SIZE + 4;
-    if (!dead && s.mesh.position.y < 0.1) { dead = true; explode(s.mesh.position, false); }
+    const blast = !!(s.ammo && (s.ammo.id === 'he' || s.ammo.id === 'rk'));
+    if (s.locked && s.locked.alive) {
+      const to = s.locked.group.position.clone().add(new THREE.Vector3(0, 1.2, 0)).sub(s.mesh.position).normalize().multiplyScalar(s.vel.length());
+      s.vel.lerp(to, Math.min(1, dt * 2.0));
+    }
+    if (s.ammo && s.ammo.id === 'rk' && Math.random() < 0.85 && particles.length < 280) {
+      const sm = new THREE.Mesh(new THREE.SphereGeometry(rand(0.2, 0.4), 5, 5),
+        new THREE.MeshBasicMaterial({ color: 0xcfd4d8, transparent: true, opacity: 0.5, depthWrite: false }));
+      sm.position.copy(s.mesh.position);
+      scene.add(sm);
+      particles.push({ mesh: sm, kind: 'smoke',
+        vel: new THREE.Vector3(rand(-0.4, 0.4), rand(0.5, 1), rand(-0.4, 0.4)), life: 0.7, maxLife: 0.7 });
+    }
+    if (!dead && s.mesh.position.y < 0.1) { dead = true; explode(s.mesh.position, blast); }
 
     if (!dead) {
       const targets = s.owner.team === 'enemy' ? [player].concat(allies) : enemies;
@@ -2844,6 +2969,21 @@ function updateShells(dt) {
               playSound('boom', 1);
             }
           } else if (t.hpBar) drawHpBar(t);
+          if (s.ammo && (s.ammo.id === 'he' || s.ammo.id === 'rk')) {
+            const others = (s.owner.team === 'enemy' ? [player].concat(allies) : enemies).filter(o2 => o2 !== t && o2.alive);
+            for (const o2 of others) {
+              if (o2.group.position.distanceTo(s.mesh.position) < 4.5) {
+                o2.hp -= Math.max(1, Math.ceil(s.damage * 0.4));
+                if (o2.hpBar) drawHpBar(o2);
+                if (o2.hp <= 0) {
+                  o2.alive = false;
+                  explode(o2.group.position.clone().setY(1.2), true);
+                  scene.remove(o2.group);
+                  addKillFeed('💥 ' + (o2.name || 'Танк') + ' накрыт взрывом', (o2.isPlayer || s.owner.team === 'enemy') ? 'enemy' : '');
+                }
+              }
+            }
+          }
           break;
         }
       }
@@ -2854,7 +2994,7 @@ function updateShells(dt) {
         const flat = Math.hypot(o.mesh.position.x - s.mesh.position.x, o.mesh.position.z - s.mesh.position.z);
         if (flat < o.r + 0.3 && s.mesh.position.y < o.h + 1) {
           dead = true;
-          explode(s.mesh.position, false);
+          explode(s.mesh.position, blast);
           break;
         }
       }
@@ -3080,6 +3220,8 @@ function updateHud() {
   const rl = clamp(1 - player.reload / player.reloadTime, 0, 1);
   document.getElementById('reload-fill').style.width = (rl * 100) + '%';
   document.getElementById('reload-label').textContent = rl >= 1 ? 'Готов к выстрелу' : 'Перезарядка...';
+  const ac = document.getElementById('ammo-cur');
+  if (ac && player) ac.textContent = currentAmmo(player).name;
   document.getElementById('score').textContent = score;
   document.getElementById('wave').textContent = Math.max(wave, 1);
   document.getElementById('enemies').textContent = enemies.filter(e => e.alive).length + (enemiesToSpawn > 0 ? ' (+' + enemiesToSpawn + ')' : '');
