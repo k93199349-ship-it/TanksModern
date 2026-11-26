@@ -74,6 +74,34 @@
   .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,209,102,.5); }
   .final-score { margin-top: 14px; font-size: 24px; color: #ffd166; }
   #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #9fb3c0; font-size: 18px; letter-spacing: 3px; z-index: 20; }
+
+  #hud.hidden { display: none; }
+  #garage { position: fixed; inset: 0; pointer-events: none; z-index: 5; color: #e8f0f5; display: none; }
+  #garage.active { display: block; }
+  .garage-top { position: absolute; top: 20px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .garage-title { font-size: 36px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+  .garage-title .accent { color: #ffd166; }
+  .garage-sub { font-size: 14px; color: #9fb3c0; margin-top: 4px; max-width: 420px; }
+  .credits { font-size: 22px; font-weight: 700; color: #ffd166; text-shadow: 0 1px 4px #000; }
+  .tank-branch { position: absolute; bottom: 118px; left: 24px; right: 24px; display: flex; gap: 14px; justify-content: center; pointer-events: auto; }
+  .tank-card { width: 168px; padding: 12px; border-radius: 10px; background: rgba(8,14,20,.85); border: 2px solid rgba(255,255,255,.12); cursor: pointer; transition: border-color .15s, transform .15s; }
+  .tank-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.35); }
+  .tank-card.selected { border-color: #ffd166; box-shadow: 0 0 18px rgba(255,209,102,.35); }
+  .tank-card.locked { opacity: .72; }
+  .tank-tier { font-size: 11px; letter-spacing: 2px; color: #9fb3c0; text-transform: uppercase; }
+  .tank-name { font-size: 18px; font-weight: 800; margin: 2px 0 6px; }
+  .tank-cost { font-size: 13px; color: #ffd166; }
+  .tank-cost.owned { color: #37d67a; }
+  .stat-panel { position: absolute; top: 110px; right: 24px; width: 265px; background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.15); border-radius: 10px; padding: 14px 16px; }
+  .stat-row { margin-bottom: 10px; }
+  .stat-name { font-size: 12px; color: #9fb3c0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .stat-bar { height: 8px; background: rgba(0,0,0,.6); border-radius: 4px; overflow: hidden; }
+  .stat-bar div { height: 100%; background: linear-gradient(90deg,#6ec6ff,#3b82f6); border-radius: 4px; }
+  .tank-desc { font-size: 13px; color: #c6d4dd; margin-top: 4px; line-height: 1.5; }
+  .garage-actions { position: absolute; bottom: 28px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; pointer-events: auto; }
+  .hint-rotate { position: absolute; bottom: 96px; left: 0; right: 0; text-align: center; font-size: 12px; color: #9fb3c0; letter-spacing: 2px; text-transform: uppercase; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn.secondary { background: linear-gradient(180deg, #8fa3b0, #64798a); color: #0f1418; box-shadow: 0 4px 18px rgba(140,160,175,.25); }
 </style>
 </head>
 <body>
@@ -97,23 +125,29 @@
   <canvas id="minimap" width="170" height="170"></canvas>
 </div>
 
-<div class="overlay" id="menu">
-  <div class="title">MODERN <span class="accent">TANKS</span></div>
-  <div class="subtitle">3D танковый бой. Уничтожай волны вражеских танков, уклоняйся от снарядов и держись как можно дольше.</div>
-  <div class="controls">
-    <span><span class="key">W A S D</span></span><span>движение корпуса</span>
-    <span><span class="key">Мышь</span></span><span>наведение башни</span>
-    <span><span class="key">ЛКМ / Пробел</span></span><span>огонь</span>
-    <span><span class="key">Shift</span></span><span>ускорение</span>
+<div id="garage" class="active">
+  <div class="garage-top">
+    <div>
+      <div class="garage-title">MODERN <span class="accent">TANKS</span></div>
+      <div class="garage-sub">Ангар: выбирай танк в ветке прокачки. Кредиты (⬤) зарабатывай в бою — за уничтоженные танки и волны. Прогресс сохраняется.</div>
+    </div>
+    <div class="credits" id="credits-display">⬤ 0</div>
   </div>
-  <button class="btn" id="btn-start">В бой</button>
+  <div class="stat-panel" id="stat-panel"></div>
+  <div class="hint-rotate">Витрина — камера вращается вокруг танка</div>
+  <div class="tank-branch" id="tank-branch"></div>
+  <div class="garage-actions">
+    <button class="btn" id="btn-buy" style="display:none">Купить</button>
+    <button class="btn" id="btn-start">В бой</button>
+  </div>
 </div>
 
 <div class="overlay hidden" id="gameover">
   <div class="title">ТАНК <span class="accent">ПОДБИТ</span></div>
   <div class="final-score" id="final-score">Счёт: 0</div>
   <div class="subtitle" id="final-wave"></div>
-  <button class="btn" id="btn-restart">Ещё раз</button>
+  <button class="btn secondary" id="btn-restart">Ещё раз</button>
+  <button class="btn secondary" id="btn-garage" style="margin-top:12px">В ангар</button>
 </div>
 
 <script type="importmap">
@@ -131,7 +165,28 @@ let scene, camera, renderer, clock;
 let player, enemies = [], shells = [], obstacles = [], particles = [];
 let keys = {}, mouse = { x: 0, y: 0, down: false };
 let aimPoint = new THREE.Vector3();
-let state = 'menu';
+let state = 'garage';
+
+const TANKS = [
+  { id: 'scout',   name: 'Барс-1М',  tier: 1, cost: 0,    color: 0x2e6f3e, hp: 4, speed: 15,  turn: 2.1, reload: 0.9, damage: 1, scale: 0.95, desc: 'Стремительный разведчик. Скорость — твоя броня: обходи врагов и бей в борт.' },
+  { id: 'brawler', name: 'Гроза-Т2', tier: 2, cost: 600,  color: 0x3a5a7a, hp: 5, speed: 12,  turn: 1.8, reload: 1.1, damage: 2, scale: 1.05, desc: 'Средний танк. Золотая середина: уверенный урон и достойная подвижность.' },
+  { id: 'heavy',   name: 'Молот-9',  tier: 3, cost: 1800, color: 0x5a4a3a, hp: 7, speed: 9.5, turn: 1.5, reload: 1.6, damage: 3, scale: 1.18, desc: 'Тяжёлая машина: толстая броня и орудие разрушительной мощи. Медленный, но страшный.' },
+  { id: 'mbt',     name: 'Абрамс-X', tier: 4, cost: 4500, color: 0x37424a, hp: 8, speed: 13,  turn: 1.9, reload: 1.0, damage: 3, scale: 1.12, desc: 'Современный ОБТ: точная стрельба, быстрая перезарядка и живучесть — вершина ветки.' }
+];
+
+let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', orbit: 0 };
+try {
+  const saved = JSON.parse(localStorage.getItem('modernTanksSave') || '{}');
+  if (Number.isFinite(saved.credits)) garage.credits = saved.credits;
+  if (Array.isArray(saved.unlocked) && saved.unlocked.length) garage.unlocked = saved.unlocked;
+  if (saved.selected && TANKS.some(t => t.id === saved.selected)) garage.selected = saved.selected;
+} catch (e) { /* сохранение недоступно */ }
+function saveGarage() {
+  try {
+    localStorage.setItem('modernTanksSave', JSON.stringify({ credits: garage.credits, unlocked: garage.unlocked, selected: garage.selected }));
+  } catch (e) { /* сохранение недоступно */ }
+}
+function getTankCfg(id) { return TANKS.find(t => t.id === id) || TANKS[0]; }
 let score = 0, wave = 0, waveTimer = 0, enemiesToSpawn = 0, spawnTimer = 0;
 let shakeAmount = 0;
 let minimapCtx;
@@ -191,7 +246,7 @@ function init() {
 
   for (let i = 0; i < 26; i++) addObstacle();
 
-  player = createTank(0x2e6f3e, true);
+  player = createTank(getTankCfg(garage.selected), true);
   player.position.set(0, 0, 20);
   scene.add(player.group);
 
@@ -208,8 +263,20 @@ function init() {
 
   document.getElementById('btn-start').addEventListener('click', startGame);
   document.getElementById('btn-restart').addEventListener('click', startGame);
+  document.getElementById('btn-garage').addEventListener('click', enterGarage);
+  document.getElementById('btn-buy').addEventListener('click', () => {
+    const cfg = getTankCfg(garage.selected);
+    if (!garage.unlocked.includes(garage.selected) && garage.credits >= cfg.cost) {
+      garage.credits -= cfg.cost;
+      garage.unlocked.push(garage.selected);
+      saveGarage();
+      playSound('hit');
+      renderGarage();
+    }
+  });
 
   document.getElementById('loading').style.display = 'none';
+  enterGarage();
   animate();
 }
 
@@ -255,9 +322,10 @@ function addObstacle() {
   obstacles.push({ mesh, r, h: hTop });
 }
 
-function createTank(color, isPlayer) {
+function createTank(cfg, isPlayer) {
   const group = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.35 });
+  group.scale.setScalar(cfg.scale || 1);
+  const mat = new THREE.MeshStandardMaterial({ color: cfg.color, roughness: 0.6, metalness: 0.35 });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x22282c, roughness: 0.8 });
 
   const hull = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 3.8), mat);
@@ -316,10 +384,11 @@ function createTank(color, isPlayer) {
   return {
     group, turret, barrel,
     isPlayer,
-    hp: isPlayer ? 5 : 3,
-    maxHp: isPlayer ? 5 : 3,
+    hp: cfg.hp,
+    maxHp: cfg.hp,
+    damage: cfg.damage || 1,
     speed: 0, heading: 0,
-    reload: 0, reloadTime: isPlayer ? 1.1 : 2.4,
+    reload: 0, reloadTime: cfg.reloadTime,
     alive: true,
     hpBar,
     ai: isPlayer ? null : { state: 'chase', strafeDir: Math.random() < 0.5 ? 1 : -1, strafeTimer: rand(1, 3) }
@@ -339,7 +408,13 @@ function drawHpBar(tank) {
 
 function spawnEnemy() {
   const colors = [0x8a3b3b, 0x7a4a8a, 0x8a6a2b];
-  const t = createTank(colors[Math.floor(Math.random() * colors.length)], false);
+  const t = createTank({
+    color: colors[Math.floor(Math.random() * colors.length)],
+    hp: 3 + Math.floor(wave / 3),
+    damage: 1,
+    reloadTime: Math.max(1.5, 2.4 - wave * 0.06),
+    scale: rand(0.95, 1.08)
+  }, false);
   const ang = rand(0, Math.PI * 2);
   const dist = rand(55, 75);
   t.position = t.group.position;
@@ -354,9 +429,89 @@ function spawnEnemy() {
   enemies.push(t);
 }
 
-function startGame() {
-  document.getElementById('menu').classList.add('hidden');
+function rebuildPlayer() {
+  const pos = player.group.position.clone();
+  const heading = player.heading;
+  scene.remove(player.group);
+  player = createTank(getTankCfg(garage.selected), true);
+  player.group.position.copy(pos);
+  player.heading = heading;
+  player.group.rotation.y = heading;
+  scene.add(player.group);
+}
+
+function rebuildTankPreview() {
+  scene.remove(player.group);
+  player = createTank(getTankCfg(garage.selected), true);
+  player.group.position.set(0, 0, 0);
+  player.heading = -0.6;
+  player.group.rotation.y = player.heading;
+  scene.add(player.group);
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    if (Math.hypot(obstacles[i].mesh.position.x, obstacles[i].mesh.position.z) < 8) {
+      scene.remove(obstacles[i].mesh);
+      obstacles.splice(i, 1);
+    }
+  }
+}
+
+function enterGarage() {
+  state = 'garage';
   document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('garage').classList.add('active');
+  document.getElementById('hud').classList.add('hidden');
+  document.body.style.cursor = 'default';
+  document.getElementById('crosshair').style.display = 'none';
+  rebuildTankPreview();
+  renderGarage();
+}
+
+function selectTank(id) {
+  garage.selected = id;
+  saveGarage();
+  rebuildTankPreview();
+  renderGarage();
+}
+
+function renderGarage() {
+  document.getElementById('credits-display').textContent = '⬤ ' + garage.credits;
+  const branch = document.getElementById('tank-branch');
+  branch.innerHTML = '';
+  for (const t of TANKS) {
+    const owned = garage.unlocked.includes(t.id);
+    const card = document.createElement('div');
+    card.className = 'tank-card' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked');
+    card.innerHTML = '<div class="tank-tier">Уровень ' + t.tier + '</div>' +
+      '<div class="tank-name">' + t.name + '</div>' +
+      '<div class="tank-cost ' + (owned ? 'owned' : '') + '">' + (owned ? '✓ В ангаре' : '⬤ ' + t.cost) + '</div>';
+    card.addEventListener('click', () => selectTank(t.id));
+    branch.appendChild(card);
+  }
+  const cfg = getTankCfg(garage.selected);
+  const owned = garage.unlocked.includes(garage.selected);
+  const bar = (label, val, max, unit) =>
+    '<div class="stat-row"><div class="stat-name"><span>' + label + '</span><span>' + val + unit + '</span></div>' +
+    '<div class="stat-bar"><div style="width:' + Math.min(100, val / max * 100) + '%"></div></div></div>';
+  document.getElementById('stat-panel').innerHTML =
+    '<div class="tank-name" style="font-size:20px">' + cfg.name + '</div>' +
+    '<div class="tank-desc">' + cfg.desc + '</div><div style="height:10px"></div>' +
+    bar('Броня', cfg.hp, 10, '') +
+    bar('Скорость', cfg.speed, 18, '') +
+    bar('Урон', cfg.damage, 4, '') +
+    bar('Перезарядка', cfg.reload, 2, ' с') +
+    (owned ? '' : '<div class="tank-cost" style="margin-top:6px">Цена: ⬤ ' + cfg.cost + '</div>');
+  const btnBuy = document.getElementById('btn-buy');
+  btnBuy.style.display = owned ? 'none' : '';
+  btnBuy.textContent = garage.credits >= cfg.cost ? 'Купить за ⬤ ' + cfg.cost : 'Не хватает ⬤ ' + (cfg.cost - garage.credits);
+  btnBuy.disabled = garage.credits < cfg.cost;
+  document.getElementById('btn-start').disabled = !owned;
+}
+
+function startGame() {
+  if (!garage.unlocked.includes(garage.selected)) return;
+  document.getElementById('garage').classList.remove('active');
+  document.getElementById('gameover').classList.add('hidden');
+  rebuildPlayer();
   for (const t of enemies) scene.remove(t.group);
   enemies = [];
   for (const s of shells) scene.remove(s.mesh);
@@ -375,12 +530,14 @@ function startGame() {
   waveTimer = 1.2;
   state = 'playing';
   document.body.style.cursor = 'none';
+  document.getElementById('hud').classList.remove('hidden');
   document.getElementById('crosshair').style.display = 'block';
   updateHud();
 }
 
 function gameOver() {
   state = 'gameover';
+  saveGarage();
   document.body.style.cursor = 'default';
   document.getElementById('crosshair').style.display = 'none';
   document.getElementById('final-score').textContent = 'Счёт: ' + score;
@@ -417,7 +574,7 @@ function fire(tank) {
   );
   shell.position.copy(spawnPos);
   scene.add(shell);
-  shells.push({ mesh: shell, dir, speed: 55, owner: tank, life: 3 });
+  shells.push({ mesh: shell, dir, speed: 55, owner: tank, life: 3, damage: tank.damage });
 
   const flash = new THREE.Mesh(
     new THREE.SphereGeometry(0.55, 8, 8),
@@ -536,7 +693,8 @@ function updatePlayer(dt) {
 
   const boost = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.5 : 1;
   const accel = 26 * boost;
-  const maxSpeed = 13 * boost;
+  const cfg = getTankCfg(garage.selected);
+  const maxSpeed = cfg.speed * boost;
   let input = 0;
   if (keys['KeyW'] || keys['ArrowUp']) input += 1;
   if (keys['KeyS'] || keys['ArrowDown']) input -= 1;
@@ -547,7 +705,7 @@ function updatePlayer(dt) {
   let turn = 0;
   if (keys['KeyA'] || keys['ArrowLeft']) turn += 1;
   if (keys['KeyD'] || keys['ArrowRight']) turn -= 1;
-  const turnRate = 1.9 * (1 - Math.abs(p.speed) / (maxSpeed * 2.4));
+  const turnRate = cfg.turn * (1 - Math.abs(p.speed) / (maxSpeed * 2.4));
   p.heading += turn * turnRate * dt * (p.speed < -0.5 ? -1 : 1);
   p.group.rotation.y = p.heading;
 
@@ -649,7 +807,7 @@ function updateShells(dt) {
         if (!t.alive) continue;
         const flat = Math.hypot(t.group.position.x - s.mesh.position.x, t.group.position.z - s.mesh.position.z);
         if (flat < 2.2 && s.mesh.position.y < 3.2) {
-          t.hp -= 1;
+          t.hp -= s.damage;
           dead = true;
           if (t.isPlayer) {
             shakeAmount = Math.max(shakeAmount, 0.5);
@@ -661,6 +819,8 @@ function updateShells(dt) {
             scene.remove(t.group);
             if (!t.isPlayer) {
               score += 100 + wave * 10;
+              garage.credits += 40 + wave * 10;
+              saveGarage();
               playSound('boom', 1);
             }
           } else if (t.hpBar) drawHpBar(t);
@@ -820,8 +980,17 @@ function animate() {
     if (!player.alive) gameOver();
   }
   updateParticles(dt);
-  updateCamera(dt);
+  if (state === 'playing') updateCamera(dt);
+  else if (state === 'garage') updateGarageCamera(dt);
   renderer.render(scene, camera);
+}
+
+function updateGarageCamera(dt) {
+  garage.orbit += dt * 0.25;
+  const r = 13;
+  camera.position.set(Math.cos(garage.orbit) * r, 5.5, Math.sin(garage.orbit) * r);
+  camera.lookAt(0, 1.4, 0);
+  if (player.alive) player.turret.rotation.y = Math.sin(garage.orbit * 0.6) * 0.6;
 }
 
 init();
