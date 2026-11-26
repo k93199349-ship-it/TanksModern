@@ -2,12 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Modern Tanks — 3D танковый бой</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e12; font-family: 'Segoe UI', Arial, sans-serif; }
-  #game-canvas { display: block; width: 100%; height: 100%; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e12; font-family: 'Segoe UI', Arial, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  @supports (height: 100dvh) { html, body { height: 100dvh; } }
+  #game-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2;
     background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.42) 100%); }
   #hud { position: fixed; inset: 0; pointer-events: none; color: #e8f0f5; z-index: 3; }
@@ -168,6 +170,12 @@
     border: 2px solid rgba(255,120,90,.75); background: rgba(178,58,26,.4); color: #fff; font-size: 30px;
     pointer-events: auto; touch-action: none; }
   #btn-fire-touch:active { background: rgba(178,58,26,.75); }
+  #btn-auto { position: absolute; right: 148px; bottom: 34px; width: 62px; height: 62px; border-radius: 50%;
+    border: 2px solid rgba(110,198,255,.5); background: rgba(8,14,20,.55); color: #cfe6f2; font-size: 24px;
+    pointer-events: auto; touch-action: none; }
+  #btn-auto.on { border-color: #37d67a; background: rgba(55,214,122,.3); box-shadow: 0 0 12px rgba(55,214,122,.5); }
+  #crosshair.auto { border-color: rgba(55,214,122,.95); box-shadow: 0 0 8px rgba(55,214,122,.7), inset 0 0 8px rgba(55,214,122,.45); }
+  #crosshair.auto::before, #crosshair.auto::after { background: rgba(55,214,122,.95); }
   .skin-card { width: 150px; padding: 12px; border-radius: 10px; background: rgba(8,14,20,.88);
     border: 2px solid rgba(255,255,255,.12); text-align: center; }
   .skin-swatch { width: 100%; height: 44px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,.25); }
@@ -184,6 +192,73 @@
   .tank-desc { font-size: 13px; color: #c6d4dd; margin-top: 4px; line-height: 1.5; }
   .garage-actions { position: absolute; bottom: 24px; right: 24px; left: auto; display: flex; justify-content: flex-end; gap: 12px; pointer-events: auto; align-items: stretch; }
   .hint-rotate { position: absolute; bottom: 72px; left: 0; right: 0; text-align: center; font-size: 12px; color: #9fb3c0; letter-spacing: 2px; text-transform: uppercase; }
+  @media (pointer: coarse) {
+    .side-btn { width: 92px; padding: 12px 4px 10px; font-size: 11px; }
+    .side-btn .ico { font-size: 27px; }
+    .filter-chip { padding: 10px 18px; font-size: 13px; }
+    .btn { min-height: 46px; }
+    .btn.small { min-height: 42px; font-size: 14px; }
+    .tank-card { width: 164px; padding: 12px; }
+    .container-card { width: 200px; padding: 16px; }
+    .crew-card { width: 200px; padding: 16px; }
+    .task-card { width: 310px; padding: 16px; }
+    #controls-help { display: none; }
+    .stick { width: 140px; height: 140px; }
+    .stick .knob { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+    #btn-fire-touch { width: 104px; height: 104px; font-size: 36px; }
+    #btn-auto { width: 64px; height: 64px; font-size: 26px; }
+  }
+  @media (orientation: landscape) and (max-height: 540px) {
+    .garage-title { font-size: 24px; }
+    .garage-sub { display: none; }
+    .profile-card { display: none; }
+    .garage-side { padding: 4px 0 4px 4px; gap: 3px; }
+    .side-btn { width: 74px; padding: 7px 2px 6px; font-size: 9px; gap: 2px; }
+    .side-btn .ico { font-size: 20px; }
+    .showcase-name { top: 10px; }
+    .showcase-name .sn-title { font-size: 18px; }
+    .stat-panel { top: 64px; right: 12px; width: 212px; padding: 10px 12px; max-height: 46vh; overflow-y: auto; }
+    .tank-desc { display: none; }
+    #tank-filter { left: 12px; bottom: 196px; gap: 5px; }
+    .filter-chip { padding: 5px 10px; font-size: 10px; }
+    .bottom-panel { bottom: 64px; left: 12px; right: 12px; gap: 10px; max-height: 46vh; overflow-y: auto; }
+    .tank-card { width: 138px; padding: 8px 10px; }
+    .container-card { width: 160px; }
+    .crew-card { width: 158px; }
+    .task-card { width: 250px; }
+    .setting-row { width: 250px; }
+    .tree-node { width: 200px; padding: 8px 12px; }
+    .garage-actions { bottom: 10px; right: 12px; gap: 8px; }
+    .btn { padding: 10px 26px; font-size: 15px; }
+    .btn.battle { padding: 10px 40px; font-size: 17px; }
+    #btn-mode { padding: 10px 12px; font-size: 10px; }
+    .hint-rotate { display: none; }
+    .hud-top-left { top: 8px; left: 8px; }
+    .hp-wrap { width: 160px; }
+    .hp-bar { height: 10px; }
+    .reload-bar { width: 160px; }
+    .hud-top-right { top: 8px; right: 8px; }
+    .stat { font-size: 12px; margin-bottom: 2px; }
+    .team-bar { top: 6px; padding: 4px 10px; font-size: 14px; gap: 6px; }
+    .wave-banner { font-size: 28px; }
+    #minimap { width: 110px; height: 110px; right: 8px; bottom: 8px; }
+    #stick-move { left: 14px; bottom: 20px; }
+    #stick-aim { right: 104px; bottom: 92px; }
+    #btn-fire-touch { right: 16px; bottom: 18px; width: 78px; height: 78px; font-size: 26px; }
+    #btn-auto { right: 106px; bottom: 22px; width: 54px; height: 54px; font-size: 22px; }
+  }
+  @media (orientation: portrait) and (max-width: 560px) {
+    .garage-sub { display: none; }
+    .garage-title { font-size: 22px; }
+    .credits { font-size: 17px; }
+    .showcase-name { top: 60px; }
+    .stat-panel { width: 200px; right: 12px; top: 96px; max-height: 40vh; overflow-y: auto; }
+    #tank-filter { left: 12px; max-width: 48%; }
+    .bottom-panel { bottom: 120px; left: 12px; right: 12px; max-height: 42vh; overflow-y: auto; }
+    .garage-actions { flex-direction: column; align-items: flex-end; gap: 8px; }
+    .btn.battle { padding: 12px 36px; }
+    #loot-box { font-size: 64px; }
+  }
   #loot-overlay { z-index: 15; }
   .loot-box { font-size: 96px; line-height: 1.2; animation: lootShake .55s infinite; filter: drop-shadow(0 8px 30px rgba(255,209,102,.4)); }
   @keyframes lootShake { 0%, 100% { transform: rotate(-7deg) scale(1); } 50% { transform: rotate(7deg) scale(1.12); } }
@@ -213,10 +288,11 @@
   <div class="wave-banner" id="wave-banner">Волна 1 · 6×6</div>
   <div id="crosshair"></div>
   <canvas id="minimap" width="170" height="170"></canvas>
-  <div id="controls-help">WASD — ехать · Мышь — прицел · ЛКМ / Пробел — огонь · Shift — ускорение</div>
+  <div id="controls-help">WASD — ехать · Мышь — прицел · ЛКМ / Пробел — огонь · Shift — ускорение · E — автоприцел</div>
   <div id="touch-ui" class="hidden">
     <div class="stick" id="stick-move"><div class="knob" id="knob-move"></div></div>
     <div class="stick" id="stick-aim"><div class="knob" id="knob-aim"></div></div>
+    <button id="btn-auto" class="on">🎯</button>
     <button id="btn-fire-touch">🔥</button>
   </div>
 </div>
@@ -313,6 +389,21 @@ let player, enemies = [], allies = [], shells = [], obstacles = [], particles = 
 let keys = {}, mouse = { x: 0, y: 0, down: false };
 const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
 const touchMove = { x: 0, y: 0 };
+let autoAim = true;
+function toggleAutoAim() {
+  autoAim = !autoAim;
+  const b = document.getElementById('btn-auto');
+  if (b) b.classList.toggle('on', autoAim);
+}
+function nearestEnemy(p) {
+  let best = null, bd = Infinity;
+  for (const t of enemies) {
+    if (!t.alive) continue;
+    const d = t.group.position.distanceToSquared(p.group.position);
+    if (d < bd) { bd = d; best = t; }
+  }
+  return best;
+}
 const touchAim = { active: false, x: 0, y: 0, angle: 0, dist: 26 };
 let fireTouch = false;
 let aimPoint = null;
@@ -479,7 +570,7 @@ function init() {
 
   clock = new THREE.Clock();
   addEventListener('resize', onResize);
-  addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
+  addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); if (e.code === 'KeyE') toggleAutoAim(); });
   addEventListener('keyup', e => { keys[e.code] = false; });
   addEventListener('mousemove', onMouseMove);
   addEventListener('mousedown', e => {
@@ -502,6 +593,9 @@ function init() {
     renderGarage();
   });
   document.getElementById('btn-buy').addEventListener('click', buySelectedTank);
+  const btnAuto = document.getElementById('btn-auto');
+  btnAuto.classList.toggle('on', autoAim);
+  btnAuto.addEventListener('click', toggleAutoAim);
   document.getElementById('btn-mode').innerHTML = modeLabel();
   document.getElementById('btn-mode').addEventListener('click', () => {
     garage.battleMode = garage.battleMode === 'normal' ? 'storm' : 'normal';
@@ -1929,6 +2023,15 @@ function updatePlayer(dt) {
     if (groundRay.ray.intersectPlane(groundPlane, hit)) {
       aimPoint.lerp(hit, 0.5);
     }
+  }
+  if (autoAim && state === 'playing') {
+    const tgt = nearestEnemy(p);
+    if (tgt) aimPoint.lerp(tgt.group.position, 0.6);
+    const ch = document.getElementById('crosshair');
+    if (ch) ch.classList.toggle('auto', !!tgt);
+  } else {
+    const ch = document.getElementById('crosshair');
+    if (ch) ch.classList.remove('auto');
   }
   const dx = aimPoint.x - p.group.position.x;
   const dz = aimPoint.z - p.group.position.z;
