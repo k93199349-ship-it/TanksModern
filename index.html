@@ -78,6 +78,46 @@
   .side-btn:hover { border-color: rgba(255,255,255,.4); }
   .side-btn .ico { font-size: 24px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
   .side-btn.active { color: #10151a; background: linear-gradient(180deg, #ffd166, #f2b705); border-color: transparent; }
+  .profile-card { margin-top: 12px; display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px;
+    background: rgba(8,14,20,.75); border: 1px solid rgba(255,255,255,.14); border-radius: 10px; }
+  .profile-avatar { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #3a5a7a, #22303c);
+    display: flex; align-items: center; justify-content: center; font-size: 19px; }
+  .profile-name { font-size: 13px; font-weight: 800; }
+  .profile-rank { font-size: 11px; color: #9fb3c0; }
+  .rank-bar { width: 120px; height: 4px; background: rgba(0,0,0,.6); border-radius: 2px; margin-top: 3px; overflow: hidden; }
+  .rank-bar div { height: 100%; background: #37d67a; }
+  #tank-filter { position: absolute; left: 24px; bottom: 252px; display: none; gap: 8px; pointer-events: auto; flex-wrap: wrap; max-width: 62%; }
+  #tank-filter.active { display: flex; }
+  .filter-chip { padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: #c6d4dd; background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.18); border-radius: 14px; cursor: pointer; }
+  .filter-chip.active { color: #10151a; background: linear-gradient(180deg, #ffd166, #f2b705); border-color: transparent; }
+  .btn.battle { margin-top: 0; padding: 14px 54px; font-size: 22px; color: #fff;
+    background: linear-gradient(180deg, #e04343, #a31d1d); box-shadow: 0 4px 20px rgba(224,67,67,.4);
+    letter-spacing: 3px; }
+  .btn.battle:hover { box-shadow: 0 8px 26px rgba(224,67,67,.55); }
+  .btn.buy { margin-top: 0; padding: 14px 28px; font-size: 15px; }
+  #btn-mode { margin-top: 0; padding: 14px 18px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  .mode-dot { width: 8px; height: 8px; border-radius: 50%; background: #37d67a; box-shadow: 0 0 8px #37d67a; flex: 0 0 auto; }
+  .tree-wrap { display: flex; flex-direction: column; align-items: center; }
+  .tree-node { width: 250px; padding: 12px 16px; border-radius: 10px; background: rgba(8,14,20,.9);
+    border: 2px solid rgba(255,255,255,.14); cursor: pointer; text-align: center; transition: border-color .15s; }
+  .tree-node:hover { border-color: rgba(255,255,255,.4); }
+  .tree-node.selected { border-color: #37d67a; box-shadow: 0 0 18px rgba(55,214,122,.35); }
+  .tree-node.locked { opacity: .8; }
+  .tree-arrow { font-size: 16px; color: #ffd166; line-height: 1.5; }
+  .task-card { width: 300px; padding: 14px; border-radius: 10px; background: rgba(8,14,20,.88);
+    border: 2px solid rgba(255,255,255,.12); }
+  .task-progress { height: 6px; background: rgba(0,0,0,.6); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .task-progress div { height: 100%; background: linear-gradient(90deg, #37d67a, #1f9e57); border-radius: 3px; }
+  .crew-card { width: 190px; padding: 14px; border-radius: 10px; background: rgba(8,14,20,.88);
+    border: 2px solid rgba(255,255,255,.12); text-align: center; }
+  .setting-row { display: flex; justify-content: space-between; align-items: center; width: 320px;
+    padding: 12px 16px; background: rgba(8,14,20,.88); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 10px; font-size: 14px; }
+  .toggle { width: 44px; height: 22px; border-radius: 11px; background: #4a5560; position: relative; cursor: pointer; transition: background .15s; flex: 0 0 auto; }
+  .toggle.on { background: #37d67a; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .15s; }
+  .toggle.on::after { left: 24px; }
   .bottom-panel { position: absolute; bottom: 96px; left: 24px; right: 24px; display: none;
     justify-content: center; gap: 14px; pointer-events: auto; flex-wrap: wrap; }
   .bottom-panel.active { display: flex; }
@@ -142,7 +182,7 @@
   .stat-bar { height: 8px; background: rgba(0,0,0,.6); border-radius: 4px; overflow: hidden; }
   .stat-bar div { height: 100%; background: linear-gradient(90deg,#6ec6ff,#3b82f6); border-radius: 4px; }
   .tank-desc { font-size: 13px; color: #c6d4dd; margin-top: 4px; line-height: 1.5; }
-  .garage-actions { position: absolute; bottom: 24px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; pointer-events: auto; }
+  .garage-actions { position: absolute; bottom: 24px; right: 24px; left: auto; display: flex; justify-content: flex-end; gap: 12px; pointer-events: auto; align-items: stretch; }
   .hint-rotate { position: absolute; bottom: 72px; left: 0; right: 0; text-align: center; font-size: 12px; color: #9fb3c0; letter-spacing: 2px; text-transform: uppercase; }
   #loot-overlay { z-index: 15; }
   .loot-box { font-size: 96px; line-height: 1.2; animation: lootShake .55s infinite; filter: drop-shadow(0 8px 30px rgba(255,209,102,.4)); }
@@ -186,6 +226,7 @@
     <div>
       <div class="garage-title">MODERN <span class="accent">TANKS</span></div>
       <div class="garage-sub">Кредиты (⬤) зарабатываются в бою. Открывай контейнеры в магазине, надевай камуфляжи из хранилища.</div>
+      <div class="profile-card" id="profile-card"></div>
     </div>
     <div class="credits" id="credits-display">⬤ 0</div>
   </div>
@@ -194,6 +235,10 @@
     <button class="side-btn" id="tab-shop"><span class="ico">🛒</span>Магазин</button>
     <button class="side-btn" id="tab-deals"><span class="ico">🏷️</span>Акции</button>
     <button class="side-btn" id="tab-storage"><span class="ico">📦</span>Хранилище</button>
+    <button class="side-btn" id="tab-tree"><span class="ico">🌳</span>Ветка</button>
+    <button class="side-btn" id="tab-tasks"><span class="ico">🎯</span>Задачи</button>
+    <button class="side-btn" id="tab-crew"><span class="ico">👥</span>Экипаж</button>
+    <button class="side-btn" id="tab-settings"><span class="ico">⚙️</span>Настройки</button>
   </div>
   <div class="showcase-name" id="showcase-name"></div>
   <div class="stat-panel" id="stat-panel"></div>
@@ -201,10 +246,23 @@
   <div class="bottom-panel" id="panel-shop"></div>
   <div class="bottom-panel" id="panel-deals"></div>
   <div class="bottom-panel" id="panel-storage"></div>
+  <div class="bottom-panel" id="panel-tree"></div>
+  <div class="bottom-panel" id="panel-tasks"></div>
+  <div class="bottom-panel" id="panel-crew"></div>
+  <div class="bottom-panel" id="panel-settings"></div>
+  <div id="tank-filter">
+    <button class="filter-chip" data-f="all">Все</button>
+    <button class="filter-chip" data-f="ЛТ">ЛТ</button>
+    <button class="filter-chip" data-f="СТ">СТ</button>
+    <button class="filter-chip" data-f="ТТ">ТТ</button>
+    <button class="filter-chip" data-f="ОБТ">ОБТ</button>
+    <button class="filter-chip" id="filter-random">🎲 Случайный</button>
+  </div>
   <div class="hint-rotate" id="garage-hint">Витрина — зажми мышь и вращай, колёсико — приближение</div>
   <div class="garage-actions">
-    <button class="btn" id="btn-buy" style="display:none">Купить</button>
-    <button class="btn" id="btn-start">В бой</button>
+    <button class="btn secondary" id="btn-mode">Режим</button>
+    <button class="btn buy" id="btn-buy" style="display:none">Купить</button>
+    <button class="btn battle" id="btn-start">В БОЙ!</button>
   </div>
 </div>
 
@@ -306,7 +364,45 @@ const CONTAINERS = [
     rolls: [ { type: 'credits', min: 500, max: 1200, chance: 0.40 }, { type: 'skin', rarity: 'epic', chance: 0.42 }, { type: 'booster', chance: 0.18 } ] }
 ];
 
-let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [] };
+const CREW = [
+  { id: 'cmd', name: 'Командир',         icon: '🎖️', stat: 'Прочность',   desc: '+6% прочности танка за уровень' },
+  { id: 'aim', name: 'Наводчик',         icon: '🎯', stat: 'Урон',        desc: '+6% урона за уровень' },
+  { id: 'drv', name: 'Механик-водитель', icon: '🔧', stat: 'Скорость',    desc: '+5% скорости за уровень' },
+  { id: 'ldr', name: 'Заряжающий',       icon: '💨', stat: 'Перезарядка', desc: '−5% времени перезарядки за уровень' }
+];
+function crewCost(lvl) { return lvl * 600; }
+const TASKS = [
+  { id: 'kills', icon: '💀', name: 'Охотник',  goal: 5,    reward: 400, desc: 'Уничтожь 5 танков врага — ежедневно' },
+  { id: 'score', icon: '⭐', name: 'Ас',       goal: 2000, reward: 600, desc: 'Набери 2000 очков за день' },
+  { id: 'wave',  icon: '🌊', name: 'Выживший', goal: 3,    reward: 800, desc: 'Доживи до 3-й волны — ежедневно' }
+];
+function tasksToday() {
+  const today = new Date().toDateString();
+  if (!garage.tasks || garage.tasks.date !== today) {
+    garage.tasks = { date: today, kills: 0, score: 0, wave: 0, claimed: [] };
+  }
+  return garage.tasks;
+}
+function crewCfg(cfg) {
+  const c = garage.crew || { cmd: 1, aim: 1, drv: 1, ldr: 1 };
+  const out = Object.assign({}, cfg);
+  out.hp = Math.round((cfg.hp || 1) * (1 + 0.06 * (c.cmd - 1)));
+  out.damage = Math.round((cfg.damage || 1) * (1 + 0.06 * (c.aim - 1)));
+  out.speed = +((cfg.speed || 10) * (1 + 0.05 * (c.drv - 1))).toFixed(1);
+  out.reload = +((cfg.reload || 1) * (1 - 0.05 * (c.ldr - 1))).toFixed(2);
+  return out;
+}
+function accountLevelProgress() {
+  const kills = garage.accountKills || 0;
+  const lvl = 1 + Math.floor(Math.sqrt(kills / 4));
+  const base = 4 * (lvl - 1) * (lvl - 1);
+  return { lvl, cur: kills - base, need: 4 * lvl * lvl - base };
+}
+function modeMult() { return garage.battleMode === 'storm' ? 1.5 : 1; }
+function modeLabel() {
+  return '<span class="mode-dot"></span>' + (garage.battleMode === 'storm' ? 'Штурм · награда ×1.5' : 'Обычный бой');
+}
+let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [], crew: { cmd: 1, aim: 1, drv: 1, ldr: 1 }, tasks: null, accountKills: 0, settings: { shake: true, shadows: true }, battleMode: 'normal', filter: 'all' };
 try {
   const saved = JSON.parse(localStorage.getItem('modernTanksSave2') || '{}');
   if (Number.isFinite(saved.credits)) garage.credits = saved.credits;
@@ -317,13 +413,22 @@ try {
   if (Number.isFinite(saved.booster)) garage.booster = saved.booster;
   if (saved.containers && typeof saved.containers === 'object') garage.containers = Object.assign(garage.containers, saved.containers);
   if (Array.isArray(saved.dealsOwned)) garage.dealsOwned = saved.dealsOwned;
+  if (saved.crew && typeof saved.crew === 'object') garage.crew = Object.assign(garage.crew, saved.crew);
+  if (Number.isFinite(saved.accountKills)) garage.accountKills = saved.accountKills;
+  if (saved.settings && typeof saved.settings === 'object') garage.settings = Object.assign(garage.settings, saved.settings);
+  if (saved.battleMode === 'storm' || saved.battleMode === 'normal') garage.battleMode = saved.battleMode;
+  if (saved.filter) garage.filter = saved.filter;
+  if (saved.tasks && typeof saved.tasks === 'object') garage.tasks = saved.tasks;
+  if (garage.tasks && garage.tasks.date !== new Date().toDateString()) garage.tasks = null;
 } catch (e) { /* сохранение недоступно */ }
 function saveGarage() {
   try {
     localStorage.setItem('modernTanksSave2', JSON.stringify({
       credits: garage.credits, unlocked: garage.unlocked, selected: garage.selected,
       skinsOwned: garage.skinsOwned, equipped: garage.equipped, booster: garage.booster,
-      containers: garage.containers, dealsOwned: garage.dealsOwned
+      containers: garage.containers, dealsOwned: garage.dealsOwned,
+      crew: garage.crew, tasks: garage.tasks, accountKills: garage.accountKills,
+      settings: garage.settings, battleMode: garage.battleMode, filter: garage.filter
     }));
   } catch (e) { /* сохранение недоступно */ }
 }
@@ -336,7 +441,7 @@ function buildTankCfg(id) {
     if (s) { cfg.color = s.color; cfg.metal = s.metal; cfg.tint = 0.65; }
   }
   if (cfg.tint === undefined) cfg.tint = 0.12;
-  return cfg;
+  return crewCfg(cfg);
 }
 
 function init() {
@@ -397,6 +502,33 @@ function init() {
     renderGarage();
   });
   document.getElementById('btn-buy').addEventListener('click', buySelectedTank);
+  document.getElementById('btn-mode').innerHTML = modeLabel();
+  document.getElementById('btn-mode').addEventListener('click', () => {
+    garage.battleMode = garage.battleMode === 'normal' ? 'storm' : 'normal';
+    saveGarage();
+    document.getElementById('btn-mode').innerHTML = modeLabel();
+    playSound('hit');
+  });
+  document.getElementById('tab-tree').addEventListener('click', () => switchTab('tree'));
+  document.getElementById('tab-tasks').addEventListener('click', () => switchTab('tasks'));
+  document.getElementById('tab-crew').addEventListener('click', () => switchTab('crew'));
+  document.getElementById('tab-settings').addEventListener('click', () => switchTab('settings'));
+  document.getElementById('tank-filter').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip || chip.id === 'filter-random') return;
+    garage.filter = chip.dataset.f;
+    saveGarage();
+    renderGarage();
+  });
+  document.getElementById('filter-random').addEventListener('click', () => {
+    const pool = TANKS.filter(t => garage.unlocked.includes(t.id));
+    const src = pool.length ? pool : TANKS;
+    garage.selected = src[Math.floor(Math.random() * src.length)].id;
+    saveGarage();
+    rebuildTankPreview();
+    renderGarage();
+  });
+  applySettings();
   document.getElementById('tab-tanks').addEventListener('click', () => switchTab('tanks'));
   document.getElementById('tab-shop').addEventListener('click', () => switchTab('shop'));
   document.getElementById('tab-deals').addEventListener('click', () => switchTab('deals'));
@@ -1063,9 +1195,9 @@ function spawnEnemy() {
     color: colors[Math.floor(Math.random() * colors.length)],
     tint: 0.5,
     model: MODEL_KEYS[Math.floor(Math.random() * MODEL_KEYS.length)],
-    hp: 3 + Math.floor(wave / 3),
+    hp: 3 + Math.floor(wave / 3) + (garage.battleMode === 'storm' ? 1 : 0),
     damage: 1,
-    reloadTime: Math.max(1.5, 2.4 - wave * 0.06),
+    reloadTime: Math.max(1.5, (2.4 - wave * 0.06) * (garage.battleMode === 'storm' ? 0.85 : 1)),
     scale: rand(0.95, 1.08)
   }, false);
   t.group.position.set(rand(-45, 45), 0, ENEMY_BASE_Z + rand(-8, 8));
@@ -1096,31 +1228,30 @@ function spawnAlly() {
 }
 
 function switchTab(tab) {
-  document.getElementById('tab-tanks').classList.toggle('active', tab === 'tanks');
-  document.getElementById('tab-shop').classList.toggle('active', tab === 'shop');
-  document.getElementById('tab-deals').classList.toggle('active', tab === 'deals');
-  document.getElementById('tab-storage').classList.toggle('active', tab === 'storage');
-  document.getElementById('panel-tanks').classList.toggle('active', tab === 'tanks');
-  document.getElementById('panel-shop').classList.toggle('active', tab === 'shop');
-  document.getElementById('panel-deals').classList.toggle('active', tab === 'deals');
-  document.getElementById('panel-storage').classList.toggle('active', tab === 'storage');
+  for (const t of ['tanks', 'shop', 'deals', 'storage', 'tree', 'tasks', 'crew', 'settings']) {
+    document.getElementById('tab-' + t).classList.toggle('active', tab === t);
+    document.getElementById('panel-' + t).classList.toggle('active', tab === t);
+  }
+  document.getElementById('tank-filter').classList.toggle('active', tab === 'tanks');
   document.getElementById('stat-panel').classList.toggle('hidden', tab !== 'tanks');
   document.getElementById('garage-hint').style.display = tab === 'tanks' ? '' : 'none';
   document.getElementById('btn-buy').style.display = 'none';
-  document.getElementById('btn-start').style.display = tab === 'tanks' ? '' : 'none';
   renderGarage();
 }
 
-function buySelectedTank() {
-  const cfg = getTankCfg(garage.selected);
-  if (!garage.unlocked.includes(garage.selected) && garage.credits >= cfg.cost) {
+function buyTank(id) {
+  const idx = TANKS.findIndex(t => t.id === id);
+  const cfg = TANKS[idx];
+  const prevOk = idx <= 0 || garage.unlocked.includes(TANKS[idx - 1].id);
+  if (prevOk && !garage.unlocked.includes(id) && garage.credits >= cfg.cost) {
     garage.credits -= cfg.cost;
-    garage.unlocked.push(garage.selected);
+    garage.unlocked.push(id);
     saveGarage();
     playSound('hit');
     renderGarage();
   }
 }
+function buySelectedTank() { buyTank(garage.selected); }
 
 function openContainer(c, free) {
   if (!free) {
@@ -1185,10 +1316,14 @@ function openContainer(c, free) {
 
 function renderGarage() {
   document.getElementById('credits-display').textContent = '⬤ ' + garage.credits;
+  document.querySelectorAll('#tank-filter .filter-chip').forEach(ch => {
+    ch.classList.toggle('active', ch.id !== 'filter-random' && (garage.filter || 'all') === ch.dataset.f);
+  });
 
   const tanksPanel = document.getElementById('panel-tanks');
   tanksPanel.innerHTML = '';
-  for (const t of TANKS) {
+  const visibleTanks = TANKS.filter(x => !garage.filter || garage.filter === 'all' || (x.cls || 'ЛТ') === garage.filter);
+  for (const t of visibleTanks) {
     const owned = garage.unlocked.includes(t.id);
     const card = document.createElement('div');
     card.className = 'tank-card' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked');
@@ -1223,10 +1358,17 @@ function renderGarage() {
     bar('Перезарядка', cfg.reload.toFixed(1) + ' с', 2, '') +
     (owned ? '' : '<div class="tank-cost" style="margin-top:6px">Цена: ⬤ ' + cfg.cost + '</div>');
 
+  const tankIdx = TANKS.indexOf(cfg);
+  const prevOwned = tankIdx <= 0 || garage.unlocked.includes(TANKS[tankIdx - 1].id);
   const btnBuy = document.getElementById('btn-buy');
   btnBuy.style.display = owned ? 'none' : '';
-  btnBuy.textContent = garage.credits >= cfg.cost ? 'Купить за ⬤ ' + cfg.cost : 'Не хватает ⬤ ' + (cfg.cost - garage.credits);
-  btnBuy.disabled = garage.credits < cfg.cost;
+  if (!prevOwned) {
+    btnBuy.textContent = '🔒 Сначала исследуй «' + TANKS[tankIdx - 1].name + '»';
+    btnBuy.disabled = true;
+  } else {
+    btnBuy.textContent = garage.credits >= cfg.cost ? 'Купить за ⬤ ' + cfg.cost : 'Не хватает ⬤ ' + (cfg.cost - garage.credits);
+    btnBuy.disabled = garage.credits < cfg.cost;
+  }
   document.getElementById('btn-start').disabled = !owned;
 
   const shopPanel = document.getElementById('panel-shop');
@@ -1342,6 +1484,145 @@ function renderGarage() {
     card.appendChild(btn);
     storagePanel.appendChild(card);
   }
+
+  const p = accountLevelProgress();
+  document.getElementById('profile-card').innerHTML =
+    '<div class="profile-avatar">🎖️</div>' +
+    '<div><div class="profile-name">Командир</div>' +
+    '<div class="profile-rank">Ранг ' + p.lvl + ' · убито: ' + (garage.accountKills || 0) + '</div>' +
+    '<div class="rank-bar"><div style="width:' + Math.min(100, p.cur / p.need * 100) + '%"></div></div></div>';
+
+  renderTree();
+  renderTasks();
+  renderCrew();
+  renderSettings();
+}
+
+function renderTree() {
+  const panel = document.getElementById('panel-tree');
+  let html = '<div class="tree-wrap">';
+  TANKS.forEach((t, i) => {
+    const owned = garage.unlocked.includes(t.id);
+    const prevOwned = i === 0 || garage.unlocked.includes(TANKS[i - 1].id);
+    if (i > 0) html += '<div class="tree-arrow">▼</div>';
+    html += '<div class="tree-node' + (garage.selected === t.id ? ' selected' : '') + (owned ? '' : ' locked') + '" data-tank="' + t.id + '">' +
+      '<div class="slot-top" style="justify-content:center"><span class="slot-tier">Ур. ' + t.tier + ' · ' + (t.cls || 'ЛТ') + '</span></div>' +
+      '<div class="tank-name">' + t.name + '</div>' +
+      '<div class="tank-cost' + (owned ? ' owned' : '') + '">' + (owned ? '✓ Исследован' : (prevOwned ? '⬤ ' + t.cost + ' — купить' : '🔒 Исследуй «' + TANKS[i - 1].name + '»')) + '</div>' +
+      (owned || !prevOwned ? '' : '<button class="btn small" data-buy="' + t.id + '"' + (garage.credits < t.cost ? ' disabled' : '') + '>Купить</button>') +
+      '</div>';
+  });
+  html += '</div>';
+  panel.innerHTML = html;
+  for (const node of panel.querySelectorAll('.tree-node')) {
+    node.addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      garage.selected = node.getAttribute('data-tank');
+      saveGarage();
+      rebuildTankPreview();
+      renderGarage();
+    });
+  }
+  for (const btn of panel.querySelectorAll('[data-buy]')) {
+    btn.addEventListener('click', () => buyTank(btn.getAttribute('data-buy')));
+  }
+}
+
+function renderTasks() {
+  const t = tasksToday();
+  const panel = document.getElementById('panel-tasks');
+  panel.innerHTML = '';
+  for (const task of TASKS) {
+    const cur = task.id === 'wave' ? (t.wave || 0) : (t[task.id] || 0);
+    const done = cur >= task.goal;
+    const claimed = t.claimed.includes(task.id);
+    const card = document.createElement('div');
+    card.className = 'task-card';
+    card.innerHTML = '<div class="slot-top"><span style="font-size:24px">' + task.icon + '</span>' +
+      '<span class="slot-tier" style="font-size:13px;color:#e8f0f5">' + task.name + '</span></div>' +
+      '<div class="c-desc" style="min-height:0">' + task.desc + '</div>' +
+      '<div class="task-progress"><div style="width:' + Math.min(100, cur / task.goal * 100) + '%"></div></div>' +
+      '<div class="c-chances">' + Math.min(cur, task.goal) + ' / ' + task.goal + ' · награда ⬤ ' + task.reward + '</div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.style.cssText = 'margin-top:8px;width:100%';
+    btn.textContent = claimed ? 'Награда получена ✓' : (done ? 'Забрать ⬤ ' + task.reward : 'В процессе');
+    btn.disabled = claimed || !done;
+    btn.addEventListener('click', () => {
+      const tt = tasksToday();
+      if (tt.claimed.includes(task.id) || (task.id === 'wave' ? (tt.wave || 0) : (tt[task.id] || 0)) < task.goal) return;
+      tt.claimed.push(task.id);
+      garage.credits += task.reward;
+      saveGarage();
+      playSound('hit');
+      renderGarage();
+    });
+    card.appendChild(btn);
+    panel.appendChild(card);
+  }
+}
+
+function renderCrew() {
+  const panel = document.getElementById('panel-crew');
+  panel.innerHTML = '';
+  for (const m of CREW) {
+    const lvl = garage.crew[m.id] || 1;
+    const maxed = lvl >= 5;
+    const card = document.createElement('div');
+    card.className = 'crew-card';
+    card.innerHTML = '<div style="font-size:34px">' + m.icon + '</div>' +
+      '<div class="c-name">' + m.name + '</div>' +
+      '<div class="skin-rarity">' + m.stat + ' · ур. ' + lvl + ' / 5</div>' +
+      '<div class="c-desc" style="min-height:38px">' + m.desc + '</div>' +
+      '<div class="task-progress"><div style="width:' + (lvl / 5 * 100) + '%"></div></div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.style.cssText = 'margin-top:8px;width:100%';
+    btn.textContent = maxed ? 'Максимум ✓' : 'Учить · ⬤ ' + crewCost(lvl);
+    btn.disabled = maxed || garage.credits < crewCost(lvl);
+    btn.addEventListener('click', () => {
+      const cost = crewCost(garage.crew[m.id] || 1);
+      if (maxed || garage.credits < cost) return;
+      garage.credits -= cost;
+      garage.crew[m.id] = (garage.crew[m.id] || 1) + 1;
+      saveGarage();
+      playSound('hit');
+      rebuildTankPreview();
+      renderGarage();
+    });
+    card.appendChild(btn);
+    panel.appendChild(card);
+  }
+}
+
+function renderSettings() {
+  const panel = document.getElementById('panel-settings');
+  const rows = [
+    { key: 'shake', name: 'Тряска камеры' },
+    { key: 'shadows', name: 'Тени' }
+  ];
+  panel.innerHTML = '';
+  for (const r of rows) {
+    const row = document.createElement('div');
+    row.className = 'setting-row';
+    row.innerHTML = '<span>' + r.name + '</span>';
+    const tg = document.createElement('div');
+    tg.className = 'toggle' + (garage.settings[r.key] ? ' on' : '');
+    tg.addEventListener('click', () => {
+      garage.settings[r.key] = !garage.settings[r.key];
+      applySettings();
+      saveGarage();
+      renderGarage();
+    });
+    row.appendChild(tg);
+    panel.appendChild(row);
+  }
+}
+
+function applySettings() {
+  if (typeof renderer === 'undefined' || !renderer) return;
+  renderer.shadowMap.enabled = garage.settings.shadows;
+  if (typeof scene !== 'undefined' && scene) scene.traverse(o => { if (o.material) o.material.needsUpdate = true; });
 }
 
 function rebuildPlayer() {
@@ -1748,8 +2029,14 @@ function updateShells(dt) {
             explode(t.group.position.clone().setY(1.2), true);
             scene.remove(t.group);
             if (s.owner.isPlayer && !t.isPlayer) {
-              score += (100 + wave * 10) * (boosterActive ? 2 : 1);
-              garage.credits += (40 + wave * 10) * (boosterActive ? 2 : 1);
+              const mult = modeMult();
+              const pts = Math.round((100 + wave * 10) * (boosterActive ? 2 : 1) * mult);
+              score += pts;
+              garage.credits += Math.round((40 + wave * 10) * (boosterActive ? 2 : 1) * mult);
+              garage.accountKills = (garage.accountKills || 0) + 1;
+              const tk = tasksToday();
+              tk.kills = (tk.kills || 0) + 1;
+              tk.score = (tk.score || 0) + pts;
               saveGarage();
               playSound('boom', 1);
             }
@@ -1847,12 +2134,14 @@ function updateWaves(dt) {
       enemiesToSpawn = 6;
       spawnTimer = 0.5;
       waveTimer = 2.5;
+      const tk = tasksToday();
+      tk.wave = Math.max(tk.wave || 0, wave);
       const banner = document.getElementById('wave-banner');
       banner.textContent = 'Волна ' + wave + ' · 6×6';
       banner.style.opacity = 1;
       setTimeout(() => banner.style.opacity = 0, 2000);
       score += 50 * (wave - 1);
-      garage.credits += (50 + wave * 20) * (boosterActive ? 2 : 1);
+      garage.credits += Math.round((50 + wave * 20) * (boosterActive ? 2 : 1) * modeMult());
       saveGarage();
       for (let i = allies.length - 1; i >= 0; i--) {
         if (!allies[i].alive) allies.splice(i, 1);
@@ -1875,7 +2164,7 @@ function updateCamera(dt) {
     .addScaledVector(back, -13)
     .add(new THREE.Vector3(0, 8.5, 0));
   camera.position.lerp(desired, Math.min(1, dt * 3.5));
-  if (shakeAmount > 0.001) {
+  if (shakeAmount > 0.001 && garage.settings.shake) {
     camera.position.x += rand(-1, 1) * shakeAmount;
     camera.position.y += rand(-1, 1) * shakeAmount * 0.6;
     camera.position.z += rand(-1, 1) * shakeAmount;
