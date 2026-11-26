@@ -67,6 +67,39 @@
   #garage { position: fixed; inset: 0; pointer-events: none; z-index: 5; color: #e8f0f5; display: none; }
   #garage.active { display: block; }
   .garage-top { position: absolute; top: 20px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .gt-left { display: flex; flex-direction: column; gap: 10px; }
+  .event-strip { display: flex; gap: 8px; }
+  .event-chip { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 7px 14px; border: 1px solid rgba(240,185,60,.45);
+    border-radius: 8px; background: linear-gradient(135deg, rgba(30,26,12,.92), rgba(12,16,22,.92)); cursor: pointer; pointer-events: auto; }
+  .event-chip b { font-size: 12px; color: #f0b93c; letter-spacing: 1px; }
+  .event-chip span { font-size: 10px; color: #9fb3c0; }
+  .event-chip.gold-chip { border-color: rgba(212,175,55,.6); }
+  .event-chip:hover { border-color: #f0b93c; }
+  .player-block { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; pointer-events: auto; }
+  .player-row { display: flex; align-items: center; gap: 9px; padding: 5px 12px; border-radius: 10px;
+    background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.12); cursor: pointer; }
+  .player-row:hover { border-color: rgba(255,255,255,.35); }
+  .pb-info { display: flex; flex-direction: column; align-items: flex-end; }
+  .pb-name { font-size: 14px; font-weight: 700; color: #eaf2f8; }
+  .pb-rank { font-size: 10px; color: #37d67a; letter-spacing: 1px; }
+  .cur-row { display: flex; align-items: center; gap: 7px; min-width: 132px; justify-content: flex-end;
+    padding: 5px 7px 5px 12px; border-radius: 9px; background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.1); cursor: pointer; }
+  .cur-row:hover { border-color: rgba(255,255,255,.35); }
+  .cur-ico { font-size: 11px; }
+  .cur-ico.cr { color: #e8c66a; }
+  .cur-ico.au { color: #ffd166; }
+  .cur-ico.xp { color: #6cc4ff; }
+  .cur-val { font-size: 13px; font-weight: 700; color: #eaf2f8; }
+  .cur-plus { width: 18px; height: 18px; border-radius: 4px; background: #2f7d46; color: #fff; font-size: 13px; line-height: 17px; text-align: center; }
+  #cur-modal { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; background: rgba(4,8,12,.78); }
+  #cur-modal.hidden { display: none; }
+  .cur-modal-card { position: relative; width: 330px; max-width: 92vw; background: rgba(10,16,22,.97); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 14px; padding: 18px; }
+  .cur-modal-card h3 { margin: 0 0 6px; font-size: 17px; }
+  .cur-modal-card p { margin: 0 0 14px; font-size: 12px; color: #9fb3c0; }
+  .cur-modal-card .ex-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cur-close { position: absolute; top: 8px; right: 10px; width: 26px; height: 26px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #cdd9e2; font-size: 13px; cursor: pointer; }
   .garage-title { font-size: 36px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
   .garage-title .accent { color: #ffd166; }
   .garage-sub { font-size: 14px; color: #9fb3c0; margin-top: 4px; max-width: 460px; }
@@ -229,6 +262,11 @@
   @media (orientation: landscape) and (max-height: 540px) {
     .garage-title { font-size: 24px; }
     .garage-sub { display: none; }
+    .event-chip { padding: 4px 8px; }
+    .event-chip span { display: none; }
+    .cur-row { min-width: 102px; padding: 3px 5px 3px 9px; }
+    .cur-val { font-size: 11px; }
+    .pb-name { font-size: 12px; }
     .profile-card { display: none; }
     .garage-side { padding: 4px 0 4px 4px; gap: 3px; }
     .side-btn { width: 74px; padding: 7px 2px 6px; font-size: 9px; gap: 2px; }
@@ -324,12 +362,24 @@
 
 <div id="garage" class="active">
   <div class="garage-top">
-    <div>
+    <div class="gt-left">
       <div class="garage-title">MODERN <span class="accent">TANKS</span></div>
-      <div class="garage-sub">Кредиты (⬤) зарабатываются в бою. Открывай контейнеры в магазине, надевай камуфляжи из хранилища.</div>
-      <div class="profile-card" id="profile-card"></div>
+      <div class="event-strip">
+        <button class="event-chip" id="event-season"><b>СЕЗОН 12</b><span>Призы за победы</span></button>
+        <button class="event-chip gold-chip" id="event-bp"><b>Боевой пропуск</b><span>Эпизод · награды</span></button>
+      </div>
     </div>
-    <div class="credits" id="credits-display">⬤ 0</div>
+    <div class="player-block">
+      <button class="player-row" id="player-row">
+        <span class="pb-info">
+          <span class="pb-name" id="pb-name">Командир</span>
+          <span class="pb-rank" id="pb-rank">Ранг 1</span>
+        </span>
+      </button>
+      <button class="cur-row" id="cur-credits"><span class="cur-ico cr">⬤</span><span class="cur-val" id="credits-display">0</span><span class="cur-plus">＋</span></button>
+      <button class="cur-row" id="cur-gold"><span class="cur-ico au">⭐</span><span class="cur-val" id="gold-display">0</span><span class="cur-plus">＋</span></button>
+      <button class="cur-row" id="cur-xp"><span class="cur-ico xp">✦</span><span class="cur-val" id="xp-display">0</span></button>
+    </div>
   </div>
   <div class="garage-side">
     <button class="side-btn active" id="tab-tanks"><span class="ico">🛡️</span>Танки</button>
@@ -375,7 +425,13 @@
   <button class="btn hidden" id="btn-claim">Забрать</button>
 </div>
 
-<div class="overlay hidden" id="gameover">
+<div id="cur-modal" class="hidden">
+    <div class="cur-modal-card">
+      <button class="cur-close" id="cur-close">✕</button>
+      <div id="cur-modal-body"></div>
+    </div>
+  </div>
+  <div class="overlay hidden" id="gameover">
   <div class="title">ТАНК <span class="accent">ПОДБИТ</span></div>
   <div class="final-score" id="final-score">Счёт: 0</div>
   <div class="subtitle" id="final-wave"></div>
@@ -495,7 +551,7 @@ const CONTAINERS = [
     rolls: [ { type: 'credits', min: 200, max: 600, chance: 0.52 }, { type: 'skin', rarity: 'rare', chance: 0.36 }, { type: 'booster', chance: 0.12 } ] },
   { id: 'elite', name: 'Элитный', cost: 2500, icon: '🏆',
     desc: 'Шанс выбить эпические камуфляжи: Хром и Золото',
-    rolls: [ { type: 'credits', min: 500, max: 1200, chance: 0.40 }, { type: 'skin', rarity: 'epic', chance: 0.42 }, { type: 'booster', chance: 0.18 } ] }
+    rolls: [ { type: 'credits', min: 500, max: 1200, chance: 0.36 }, { type: 'skin', rarity: 'epic', chance: 0.40 }, { type: 'booster', chance: 0.14 }, { type: 'gold', min: 5, max: 25, chance: 0.10 } ] }
 ];
 
 const CREW = [
@@ -536,10 +592,13 @@ function modeMult() { return garage.battleMode === 'storm' ? 1.5 : 1; }
 function modeLabel() {
   return '<span class="mode-dot"></span>' + (garage.battleMode === 'storm' ? 'Штурм · награда ×1.5' : 'Обычный бой');
 }
-let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [], crew: { cmd: 1, aim: 1, drv: 1, ldr: 1 }, tasks: null, accountKills: 0, settings: { shake: true, shadows: true }, battleMode: 'normal', filter: 'all' };
+let garage = { credits: 0, gold: 50, freeXp: 0, nickname: 'Командир', unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [], crew: { cmd: 1, aim: 1, drv: 1, ldr: 1 }, tasks: null, accountKills: 0, settings: { shake: true, shadows: true }, battleMode: 'normal', filter: 'all' };
 try {
   const saved = JSON.parse(localStorage.getItem('modernTanksSave2') || '{}');
   if (Number.isFinite(saved.credits)) garage.credits = saved.credits;
+  if (Number.isFinite(saved.gold)) garage.gold = saved.gold;
+  if (Number.isFinite(saved.freeXp)) garage.freeXp = saved.freeXp;
+  if (typeof saved.nickname === 'string' && saved.nickname) garage.nickname = saved.nickname;
   if (Array.isArray(saved.unlocked) && saved.unlocked.length) garage.unlocked = saved.unlocked;
   if (saved.selected && TANKS.some(t => t.id === saved.selected)) garage.selected = saved.selected;
   if (Array.isArray(saved.skinsOwned)) garage.skinsOwned = saved.skinsOwned;
@@ -558,7 +617,8 @@ try {
 function saveGarage() {
   try {
     localStorage.setItem('modernTanksSave2', JSON.stringify({
-      credits: garage.credits, unlocked: garage.unlocked, selected: garage.selected,
+      credits: garage.credits, gold: garage.gold, freeXp: garage.freeXp, nickname: garage.nickname,
+      unlocked: garage.unlocked, selected: garage.selected,
       skinsOwned: garage.skinsOwned, equipped: garage.equipped, booster: garage.booster,
       containers: garage.containers, dealsOwned: garage.dealsOwned,
       crew: garage.crew, tasks: garage.tasks, accountKills: garage.accountKills,
@@ -643,6 +703,16 @@ function init() {
   btnAuto.classList.toggle('on', autoAim);
   btnAuto.addEventListener('click', toggleAutoAim);
   document.getElementById('btn-back').addEventListener('click', () => switchTab('tanks'));
+  document.getElementById('cur-credits').addEventListener('click', () => { document.getElementById('cur-modal').classList.remove('hidden'); renderCurModal('credits'); });
+  document.getElementById('cur-gold').addEventListener('click', () => { document.getElementById('cur-modal').classList.remove('hidden'); renderCurModal('xp'); });
+  document.getElementById('cur-xp').addEventListener('click', () => { document.getElementById('cur-modal').classList.remove('hidden'); renderCurModal('xp'); });
+  document.getElementById('cur-close').addEventListener('click', () => document.getElementById('cur-modal').classList.add('hidden'));
+  document.getElementById('player-row').addEventListener('click', () => {
+    const n = prompt('Ник командира:', garage.nickname || 'Командир');
+    if (n && n.trim()) { garage.nickname = n.trim().slice(0, 18); saveGarage(); renderGarage(); }
+  });
+  document.getElementById('event-season').addEventListener('click', () => switchTab('deals'));
+  document.getElementById('event-bp').addEventListener('click', () => switchTab('tasks'));
   document.getElementById('btn-mode').innerHTML = modeLabel();
   document.getElementById('btn-mode').addEventListener('click', () => {
     garage.battleMode = garage.battleMode === 'normal' ? 'storm' : 'normal';
@@ -1620,6 +1690,11 @@ function openContainer(c, free) {
       garage.credits += 400;
       text = '+400 ⬤ (все камуфляжи этого уровня уже у тебя)';
     }
+  } else if (reward.type === 'gold') {
+    const amount = Math.floor(rand(reward.min, reward.max));
+    garage.gold = (garage.gold || 0) + amount;
+    icon = '⭐';
+    text = '+' + amount + ' золота';
   } else {
     if (garage.booster < 3) {
       garage.booster += 1;
@@ -1650,8 +1725,34 @@ function openContainer(c, free) {
   }, 1300);
 }
 
+function fmtNum(n) { return n.toLocaleString('ru-RU'); }
+function renderCurModal(kind) {
+  const body = document.getElementById('cur-modal-body');
+  const isCr = kind === 'credits';
+  body.innerHTML =
+    '<h3>' + (isCr ? 'Обмен золота на кредиты' : 'Обмен золота на опыт') + '</h3>' +
+    '<p>' + (isCr ? 'Курс 1 ' + '⭐' + ' = 400 ' + '⬤' + '. Золото добывается за волны и из Элитных контейнеров.' : 'Курс 1 ' + '⭐' + ' = 25 ' + '✦' + ' свободного опыта.') + '</p>' +
+    '<div class="ex-btns">' + [1, 5, 10].map(g =>
+      '<button class="btn small ex-btn" data-g="' + g + '"' + ((garage.gold || 0) < g ? ' disabled' : '') + '>' + g + ' ⭐ → ' + fmtNum(g * (isCr ? 400 : 25)) + '</button>'
+    ).join('') + '</div>';
+  for (const b of body.querySelectorAll('.ex-btn')) {
+    b.addEventListener('click', () => {
+      const g = +b.getAttribute('data-g');
+      if ((garage.gold || 0) < g) return;
+      garage.gold -= g;
+      if (isCr) garage.credits += g * 400; else garage.freeXp = (garage.freeXp || 0) + g * 25;
+      saveGarage();
+      playSound('hit');
+      renderGarage();
+      renderCurModal(kind);
+    });
+  }
+}
+
 function renderGarage() {
-  document.getElementById('credits-display').textContent = '⬤ ' + garage.credits;
+  document.getElementById('credits-display').textContent = fmtNum(garage.credits);
+  document.getElementById('gold-display').textContent = fmtNum(garage.gold || 0);
+  document.getElementById('xp-display').textContent = fmtNum(garage.freeXp || 0);
   document.querySelectorAll('#tank-filter .filter-chip').forEach(ch => {
     ch.classList.toggle('active', ch.id !== 'filter-random' && (garage.filter || 'all') === ch.dataset.f);
   });
@@ -1822,11 +1923,8 @@ function renderGarage() {
   }
 
   const p = accountLevelProgress();
-  document.getElementById('profile-card').innerHTML =
-    '<div class="profile-avatar">🎖️</div>' +
-    '<div><div class="profile-name">Командир</div>' +
-    '<div class="profile-rank">Ранг ' + p.lvl + ' · убито: ' + (garage.accountKills || 0) + '</div>' +
-    '<div class="rank-bar"><div style="width:' + Math.min(100, p.cur / p.need * 100) + '%"></div></div></div>';
+  document.getElementById('pb-name').textContent = garage.nickname || 'Командир';
+  document.getElementById('pb-rank').textContent = 'Ранг ' + p.lvl + ' · убито: ' + (garage.accountKills || 0);
 
   renderTree();
   renderTasks();
@@ -2406,6 +2504,7 @@ function updateShells(dt) {
               const pts = Math.round((100 + wave * 10) * (boosterActive ? 2 : 1) * mult);
               score += pts;
               garage.credits += Math.round((40 + wave * 10) * (boosterActive ? 2 : 1) * mult);
+              garage.freeXp = (garage.freeXp || 0) + Math.round(15 * mult);
               garage.accountKills = (garage.accountKills || 0) + 1;
               const tk = tasksToday();
               tk.kills = (tk.kills || 0) + 1;
@@ -2515,6 +2614,7 @@ function updateWaves(dt) {
       setTimeout(() => banner.style.opacity = 0, 2000);
       score += 50 * (wave - 1);
       garage.credits += Math.round((50 + wave * 20) * (boosterActive ? 2 : 1) * modeMult());
+      garage.gold = (garage.gold || 0) + 1;
       saveGarage();
       for (let i = allies.length - 1; i >= 0; i--) {
         if (!allies[i].alive) allies.splice(i, 1);
