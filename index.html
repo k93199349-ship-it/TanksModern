@@ -69,10 +69,15 @@
   .garage-title .accent { color: #ffd166; }
   .garage-sub { font-size: 14px; color: #9fb3c0; margin-top: 4px; max-width: 460px; }
   .credits { font-size: 22px; font-weight: 700; color: #ffd166; text-shadow: 0 1px 4px #000; }
-  .garage-tabs { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; pointer-events: auto; }
-  .tab-btn { padding: 9px 22px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    color: #c6d4dd; background: rgba(8,14,20,.85); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; cursor: pointer; }
-  .tab-btn.active { color: #10151a; background: linear-gradient(180deg, #ffd166, #f2b705); border-color: transparent; }
+  .garage-side { position: absolute; left: 0; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 4px;
+    padding: 8px 0 8px 6px; pointer-events: auto; }
+  .side-btn { width: 82px; padding: 10px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #c6d4dd;
+    background: rgba(8,14,20,.88); border: 1px solid rgba(255,255,255,.16); border-right: none;
+    border-radius: 10px 0 0 10px; cursor: pointer; transition: background .12s, color .12s; }
+  .side-btn:hover { border-color: rgba(255,255,255,.4); }
+  .side-btn .ico { font-size: 24px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+  .side-btn.active { color: #10151a; background: linear-gradient(180deg, #ffd166, #f2b705); border-color: transparent; }
   .bottom-panel { position: absolute; bottom: 96px; left: 24px; right: 24px; display: none;
     justify-content: center; gap: 14px; pointer-events: auto; flex-wrap: wrap; }
   .bottom-panel.active { display: flex; }
@@ -184,11 +189,11 @@
     </div>
     <div class="credits" id="credits-display">⬤ 0</div>
   </div>
-  <div class="garage-tabs">
-    <button class="tab-btn active" id="tab-tanks">Танки</button>
-    <button class="tab-btn" id="tab-shop">Магазин</button>
-    <button class="tab-btn" id="tab-deals">Акции</button>
-    <button class="tab-btn" id="tab-storage">Хранилище</button>
+  <div class="garage-side">
+    <button class="side-btn active" id="tab-tanks"><span class="ico">🛡️</span>Танки</button>
+    <button class="side-btn" id="tab-shop"><span class="ico">🛒</span>Магазин</button>
+    <button class="side-btn" id="tab-deals"><span class="ico">🏷️</span>Акции</button>
+    <button class="side-btn" id="tab-storage"><span class="ico">📦</span>Хранилище</button>
   </div>
   <div class="showcase-name" id="showcase-name"></div>
   <div class="stat-panel" id="stat-panel"></div>
