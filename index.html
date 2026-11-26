@@ -550,13 +550,13 @@ window.MAP_TEX = {
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-const WORLD_SIZE = 200;
-const ALLY_BASE_Z = 150, ENEMY_BASE_Z = -150;
+const WORLD_SIZE = 280;
+const ALLY_BASE_Z = 200, ENEMY_BASE_Z = -200;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
 
 let scene, camera, renderer, clock;
-let player, enemies = [], allies = [], shells = [], obstacles = [], particles = [];
+let player, enemies = [], allies = [], shells = [], obstacles = [], particles = [], ponds = [];
 let keys = {}, mouse = { x: 0, y: 0, down: false };
 const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
 const touchMove = { x: 0, y: 0 };
@@ -732,7 +732,7 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b0f14);
 
-  camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 700);
+  camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 950);
   camera.position.set(0, 5, 12);
 
   hemiLight = new THREE.HemisphereLight(0xbfd8e8, 0x3d4a35, 0.25);
@@ -983,16 +983,19 @@ function buildWorld() {
   scene.add(ground);
 
   addRoads();
-  for (let i = 0; i < 12; i++) addHouse();
-  for (let i = 0; i < 10; i++) addRuins();
-  for (let i = 0; i < 26; i++) addObstacle();
-  for (let i = 0; i < 90; i++) addTree();
-  for (let i = 0; i < 45; i++) addBush();
-  for (let i = 0; i < 12; i++) addSandbags();
-  for (let i = 0; i < 10; i++) addBarrier();
-  for (let i = 0; i < 8; i++) addBarrels();
-  for (let i = 0; i < 4; i++) addTower();
-  for (let i = 0; i < 10; i++) addDirtPatch();
+  for (let i = 0; i < 2; i++) addPond();
+  for (let i = 0; i < 14; i++) addHouse();
+  for (let i = 0; i < 12; i++) addRuins();
+  for (let i = 0; i < 30; i++) addObstacle();
+  addForest();
+  addBushField();
+  scatterRocks();
+  scatterGrass();
+  for (let i = 0; i < 14; i++) addSandbags();
+  for (let i = 0; i < 12; i++) addBarrier();
+  for (let i = 0; i < 10; i++) addBarrels();
+  for (let i = 0; i < 5; i++) addTower();
+  for (let i = 0; i < 16; i++) addDirtPatch();
 }
 
 function nearBase(x, z, pad) {
@@ -1005,6 +1008,8 @@ function findClearSpot(r, pad = 20) {
     const z = rand(-WORLD_SIZE + 10, WORLD_SIZE - 10);
     if (nearBase(x, z, pad)) continue;
     if (Math.abs(Math.abs(x) - 60) < 10) continue;
+    if (Math.abs(z) < 10 || Math.abs(Math.abs(z) - 120) < 10) continue;
+    if (ponds.some(p => Math.hypot(p.x - x, p.z - z) < p.r + r + 6)) continue;
     if (obstacles.some(o => Math.hypot(o.mesh.position.x - x, o.mesh.position.z - z) < o.r + r + 3)) continue;
     return { x, z };
   }
@@ -1028,45 +1033,147 @@ function addRoads() {
   cross.position.y = 0.02;
   cross.receiveShadow = true;
   scene.add(cross);
+  for (const rz of [-120, 120]) {
+    const road2 = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_SIZE * 2, 12), crossMat);
+    road2.rotation.x = -Math.PI / 2;
+    road2.position.set(0, 0.02, rz);
+    road2.receiveShadow = true;
+    scene.add(road2);
+  }
 }
 
-function addTree() {
-  const spot = findClearSpot(0.8, 16);
-  if (!spot) return;
-  const g = new THREE.Group();
-  const h = rand(3, 5.5);
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.5, h, 7),
-    new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 1, flatShading: true }));
-  trunk.position.y = h / 2;
-  trunk.castShadow = true;
-  g.add(trunk);
-  const crownMat = new THREE.MeshStandardMaterial({
-    color: [0x3d6b35, 0x47753a, 0x35602f][Math.floor(Math.random() * 3)], roughness: 1, flatShading: true
+function makeInstanced(geo, mat, items, shadows) {
+  const im = new THREE.InstancedMesh(geo, mat, Math.max(items.length, 1));
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(),
+    p = new THREE.Vector3(), s = new THREE.Vector3();
+  items.forEach((t, i) => {
+    e.set(t.rx || 0, t.ry || 0, t.rz || 0);
+    q.setFromEuler(e);
+    p.set(t.x, t.y || 0, t.z);
+    s.set(t.sx || t.s || 1, t.sy || t.s || 1, t.sz || t.s || 1);
+    m4.compose(p, q, s);
+    im.setMatrixAt(i, m4);
   });
-  const c1 = new THREE.Mesh(new THREE.ConeGeometry(rand(1.8, 2.6), rand(3, 4.6), 7), crownMat);
-  c1.position.y = h + 1.2;
-  c1.castShadow = true;
-  g.add(c1);
-  const c2 = new THREE.Mesh(new THREE.ConeGeometry(rand(1.1, 1.7), rand(2, 3), 7), crownMat);
-  c2.position.y = h + 2.8;
-  g.add(c2);
-  g.position.set(spot.x, 0, spot.z);
-  g.rotation.y = rand(0, Math.PI * 2);
-  scene.add(g);
-  obstacles.push({ mesh: g, r: 0.8, h: h + 3 });
+  im.count = items.length;
+  im.castShadow = !!shadows;
+  im.instanceMatrix.needsUpdate = true;
+  scene.add(im);
+  return im;
 }
 
-function addBush() {
-  const spot = findClearSpot(1.2, 14);
+function addForest() {
+  const trunkGeo = new THREE.CylinderGeometry(0.22, 0.42, 1, 6);
+  trunkGeo.translate(0, 0.5, 0);
+  const coneGeo = new THREE.ConeGeometry(1, 1, 7);
+  const ballGeo = new THREE.SphereGeometry(1, 7, 6);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 1, flatShading: true });
+  const birchMat = new THREE.MeshStandardMaterial({ color: 0xbdb8a6, roughness: 0.9, flatShading: true });
+  const pineMat = new THREE.MeshStandardMaterial({ color: 0x2f5a2c, roughness: 1, flatShading: true });
+  const leafMats = [0x47753a, 0x3d6b35, 0x577e35, 0x6b7a30]
+    .map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1, flatShading: true }));
+  const pTrunks = [], pines = [], bTrunks = [];
+  const leafBuckets = leafMats.map(() => []);
+  for (let i = 0; i < 190; i++) {
+    const spot = findClearSpot(0.9, 16);
+    if (!spot) continue;
+    const h = rand(3.2, 6.2);
+    const pine = Math.random() < 0.5;
+    const birch = !pine && Math.random() < 0.35;
+    (birch ? bTrunks : pTrunks).push({ x: spot.x, y: 0, z: spot.z, s: birch ? 0.7 : 1, sy: h, ry: rand(0, 3) });
+    if (pine) {
+      pines.push({ x: spot.x, y: h - 0.4, z: spot.z, s: rand(2.0, 2.9), sy: rand(3.6, 5.2), ry: rand(0, 3) });
+      pines.push({ x: spot.x, y: h + 1.1, z: spot.z, s: rand(1.3, 1.9), sy: rand(2.2, 3.2), ry: rand(0, 3) });
+    } else {
+      const cr = rand(1.7, 2.7);
+      const b = leafBuckets[Math.floor(Math.random() * leafMats.length)];
+      b.push({ x: spot.x, y: h + cr * 0.55, z: spot.z, s: cr, sy: cr * 0.95, ry: rand(0, 3) });
+      b.push({ x: spot.x + rand(-0.9, 0.9), y: h + cr * 1.05, z: spot.z + rand(-0.9, 0.9), s: cr * 0.62, sy: cr * 0.62, ry: rand(0, 3) });
+    }
+    obstacles.push({ mesh: { position: new THREE.Vector3(spot.x, 0, spot.z) }, r: 0.7, h: h + 3, noMap: true });
+  }
+  makeInstanced(trunkGeo, trunkMat, pTrunks, true);
+  makeInstanced(trunkGeo, birchMat, bTrunks, true);
+  makeInstanced(coneGeo, pineMat, pines, true);
+  leafMats.forEach((m, i) => makeInstanced(ballGeo, m, leafBuckets[i], true));
+}
+
+function addBushField() {
+  const ballGeo = new THREE.SphereGeometry(1, 7, 6);
+  const mats = [0x46683a, 0x527440, 0x3c5c33, 0x5d7f3e]
+    .map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1, flatShading: true }));
+  const buckets = mats.map(() => []);
+  for (let i = 0; i < 130; i++) {
+    const spot = findClearSpot(1.0, 12);
+    if (!spot) continue;
+    const s = rand(0.8, 1.8);
+    buckets[Math.floor(Math.random() * mats.length)].push({ x: spot.x, y: s * 0.35, z: spot.z, s, sy: s * 0.65, ry: rand(0, 3) });
+  }
+  mats.forEach((m, i) => makeInstanced(ballGeo, m, buckets[i], true));
+}
+
+function scatterGrass() {
+  const geo = new THREE.PlaneGeometry(0.9, 0.7);
+  geo.translate(0, 0.35, 0);
+  const tones = [0x6a8f3c, 0x7fa04a].map(c =>
+    new THREE.MeshStandardMaterial({ color: c, roughness: 1, side: THREE.DoubleSide }));
+  for (const mat of tones) {
+    const a = [], b = [];
+    for (let i = 0; i < 700; i++) {
+      const x = rand(-WORLD_SIZE + 6, WORLD_SIZE - 6), z = rand(-WORLD_SIZE + 6, WORLD_SIZE - 6);
+      if (nearBase(x, z, 14)) continue;
+      if (ponds.some(p => Math.hypot(p.x - x, p.z - z) < p.r - 2)) continue;
+      const s = rand(0.7, 1.6);
+      a.push({ x, y: 0, z, ry: rand(0, Math.PI), s });
+      b.push({ x, y: 0, z, ry: rand(0, Math.PI) + Math.PI / 2, s });
+    }
+    makeInstanced(geo, mat, a, false);
+    makeInstanced(geo, mat, b, false);
+  }
+}
+
+function scatterRocks() {
+  const geo = new THREE.DodecahedronGeometry(1, 0);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x77706a, roughness: 1, flatShading: true });
+  const items = [];
+  for (let i = 0; i < 110; i++) {
+    const spot = findClearSpot(0.5, 10);
+    if (!spot) continue;
+    const s = rand(0.25, 0.8);
+    items.push({ x: spot.x, y: s * 0.5, z: spot.z, s, sy: s * 0.7, rx: rand(0, 3), ry: rand(0, 3) });
+  }
+  makeInstanced(geo, mat, items, false);
+}
+
+function addPond() {
+  let spot = null;
+  for (let t = 0; t < 30; t++) {
+    const s = findClearSpot(17, 44);
+    if (s && Math.abs(s.z) > 16) { spot = s; break; }
+  }
   if (!spot) return;
-  const bush = new THREE.Mesh(new THREE.SphereGeometry(rand(0.9, 1.7), 7, 6),
-    new THREE.MeshStandardMaterial({
-      color: [0x46683a, 0x527440, 0x3c5c33][Math.floor(Math.random() * 3)], roughness: 1, flatShading: true
-    }));
-  bush.position.set(spot.x, 0.5, spot.z);
-  bush.scale.y = 0.65;
-  bush.castShadow = true;
-  scene.add(bush);
+  const r = rand(12, 16);
+  ponds.push({ x: spot.x, z: spot.z, r });
+  const shoreTex = loadMapTex('dirt', 4, 4);
+  const shore = new THREE.Mesh(new THREE.CircleGeometry(r + 2.2, 26),
+    new THREE.MeshStandardMaterial(shoreTex ? { map: shoreTex, color: 0xcbb99b, roughness: 1 } : { color: 0x6a5b46, roughness: 1 }));
+  shore.rotation.x = -Math.PI / 2;
+  shore.position.set(spot.x, 0.04, spot.z);
+  shore.receiveShadow = true;
+  scene.add(shore);
+  const water = new THREE.Mesh(new THREE.CircleGeometry(r, 26),
+    new THREE.MeshStandardMaterial({ color: 0x2e6284, transparent: true, opacity: 0.85, roughness: 0.15, metalness: 0.25 }));
+  water.rotation.x = -Math.PI / 2;
+  water.position.set(spot.x, 0.08, spot.z);
+  scene.add(water);
+  const reedGeo = new THREE.CylinderGeometry(0.05, 0.08, 1, 4);
+  reedGeo.translate(0, 0.5, 0);
+  const reedMat = new THREE.MeshStandardMaterial({ color: 0x3f6023, roughness: 1, flatShading: true });
+  const reeds = [];
+  for (let i = 0; i < 55; i++) {
+    const a = rand(0, Math.PI * 2), rr = r + rand(-1, 1.6);
+    reeds.push({ x: spot.x + Math.cos(a) * rr, y: 0, z: spot.z + Math.sin(a) * rr, s: 1, sy: rand(0.8, 1.7), ry: rand(0, 3) });
+  }
+  makeInstanced(reedGeo, reedMat, reeds, false);
 }
 
 function addHouse() {
@@ -2290,7 +2397,7 @@ function startGame() {
   hangar.visible = false;
   sunLight.visible = true;
   hemiLight.intensity = 0.9;
-  scene.fog = new THREE.Fog(0xc9ab8f, 80, 320);
+  scene.fog = new THREE.Fog(0xc9ab8f, 110, 520);
   const skyTex = loadMapTex('sky', 1, 1);
   if (skyTex) {
     skyTex.mapping = THREE.EquirectangularReflectionMapping;
@@ -2952,6 +3059,7 @@ function drawMinimap() {
   const scale = W / (WORLD_SIZE * 2);
   const toMap = (x, z) => [(x + WORLD_SIZE) * scale, (z + WORLD_SIZE) * scale];
   for (const o of obstacles) {
+    if (o.noMap) continue;
     const [mx, mz] = toMap(o.mesh.position.x, o.mesh.position.z);
     ctx.fillStyle = 'rgba(160,160,160,.5)';
     ctx.fillRect(mx - 1.5, mz - 1.5, 3, 3);
