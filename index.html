@@ -22,6 +22,13 @@
   .hp-fill.low { background: linear-gradient(90deg, #ff5f5f, #e63946); }
   .stat { font-size: 15px; text-shadow: 0 1px 3px #000; margin-bottom: 4px; }
   .stat b { color: #ffd166; }
+  .team-bar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px; background: rgba(8,14,20,.65);
+    border-radius: 8px; padding: 6px 16px; font-size: 17px; font-weight: 700; text-shadow: 0 1px 3px #000; }
+  .team-bar .tb-ally { color: #37d67a; }
+  .team-bar .tb-enemy { color: #ff5f5f; }
+  .team-bar .tb-sep { color: #9fb3c0; font-weight: 400; }
+  .team-bar .tb-label { font-size: 11px; font-weight: 400; color: #9fb3c0; text-transform: uppercase; letter-spacing: 1px; }
   #booster-chip { display: none; color: #ffd166; font-weight: 700; }
   .wave-banner { position: absolute; top: 18%; left: 50%; transform: translateX(-50%);
     font-size: 44px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase;
@@ -142,7 +149,8 @@
     <div class="stat">Врагов: <b id="enemies">0</b></div>
     <div class="stat" id="booster-chip">⚡ Кредиты ×2 активны</div>
   </div>
-  <div class="wave-banner" id="wave-banner">Волна 1</div>
+  <div class="team-bar"><span class="tb-label">Союзники</span><span class="tb-ally" id="tb-ally">6</span><span class="tb-sep">:</span><span class="tb-enemy" id="tb-enemy">6</span><span class="tb-label">Враги</span></div>
+  <div class="wave-banner" id="wave-banner">Волна 1 · 6×6</div>
   <div id="crosshair"></div>
   <canvas id="minimap" width="170" height="170"></canvas>
   <div id="controls-help">WASD — ехать · Мышь — прицел · ЛКМ / Пробел — огонь · Shift — ускорение</div>
@@ -216,12 +224,13 @@ window.TANK_GLB = {
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-const WORLD_SIZE = 140;
+const WORLD_SIZE = 200;
+const ALLY_BASE_Z = 150, ENEMY_BASE_Z = -150;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
 
 let scene, camera, renderer, clock;
-let player, enemies = [], shells = [], obstacles = [], particles = [];
+let player, enemies = [], allies = [], shells = [], obstacles = [], particles = [];
 let keys = {}, mouse = { x: 0, y: 0, down: false };
 const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
 const touchMove = { x: 0, y: 0 };
@@ -320,7 +329,7 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b0f14);
 
-  camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 400);
+  camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 700);
   camera.position.set(0, 5, 12);
 
   hemiLight = new THREE.HemisphereLight(0xbfd8e8, 0x3d4a35, 0.25);
@@ -461,7 +470,129 @@ function buildWorld() {
   ground.receiveShadow = true;
   scene.add(ground);
 
+  addRoads();
+  for (let i = 0; i < 12; i++) addHouse();
+  for (let i = 0; i < 10; i++) addRuins();
   for (let i = 0; i < 26; i++) addObstacle();
+  for (let i = 0; i < 90; i++) addTree();
+  for (let i = 0; i < 45; i++) addBush();
+}
+
+function nearBase(x, z, pad) {
+  return Math.hypot(x, z - ALLY_BASE_Z) < pad || Math.hypot(x, z - ENEMY_BASE_Z) < pad;
+}
+
+function findClearSpot(r, pad = 20) {
+  for (let t = 0; t < 25; t++) {
+    const x = rand(-WORLD_SIZE + 10, WORLD_SIZE - 10);
+    const z = rand(-WORLD_SIZE + 10, WORLD_SIZE - 10);
+    if (nearBase(x, z, pad)) continue;
+    if (Math.abs(Math.abs(x) - 60) < 10) continue;
+    if (obstacles.some(o => Math.hypot(o.mesh.position.x - x, o.mesh.position.z - z) < o.r + r + 3)) continue;
+    return { x, z };
+  }
+  return null;
+}
+
+function addRoads() {
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x4a463d, roughness: 1 });
+  for (const rx of [-60, 60]) {
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(14, WORLD_SIZE * 2), roadMat);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(rx, 0.02, 0);
+    road.receiveShadow = true;
+    scene.add(road);
+  }
+  const cross = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_SIZE * 2, 12), roadMat);
+  cross.rotation.x = -Math.PI / 2;
+  cross.position.y = 0.02;
+  cross.receiveShadow = true;
+  scene.add(cross);
+}
+
+function addTree() {
+  const spot = findClearSpot(0.8, 16);
+  if (!spot) return;
+  const g = new THREE.Group();
+  const h = rand(3, 5.5);
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.5, h, 7),
+    new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 1, flatShading: true }));
+  trunk.position.y = h / 2;
+  trunk.castShadow = true;
+  g.add(trunk);
+  const crownMat = new THREE.MeshStandardMaterial({
+    color: [0x3d6b35, 0x47753a, 0x35602f][Math.floor(Math.random() * 3)], roughness: 1, flatShading: true
+  });
+  const c1 = new THREE.Mesh(new THREE.ConeGeometry(rand(1.8, 2.6), rand(3, 4.6), 7), crownMat);
+  c1.position.y = h + 1.2;
+  c1.castShadow = true;
+  g.add(c1);
+  const c2 = new THREE.Mesh(new THREE.ConeGeometry(rand(1.1, 1.7), rand(2, 3), 7), crownMat);
+  c2.position.y = h + 2.8;
+  g.add(c2);
+  g.position.set(spot.x, 0, spot.z);
+  g.rotation.y = rand(0, Math.PI * 2);
+  scene.add(g);
+  obstacles.push({ mesh: g, r: 0.8, h: h + 3 });
+}
+
+function addBush() {
+  const spot = findClearSpot(1.2, 14);
+  if (!spot) return;
+  const bush = new THREE.Mesh(new THREE.SphereGeometry(rand(0.9, 1.7), 7, 6),
+    new THREE.MeshStandardMaterial({
+      color: [0x46683a, 0x527440, 0x3c5c33][Math.floor(Math.random() * 3)], roughness: 1, flatShading: true
+    }));
+  bush.position.set(spot.x, 0.5, spot.z);
+  bush.scale.y = 0.65;
+  bush.castShadow = true;
+  scene.add(bush);
+}
+
+function addHouse() {
+  const spot = findClearSpot(4.6, 26);
+  if (!spot) return;
+  const g = new THREE.Group();
+  const w = rand(5.5, 8.5), d = rand(5, 7.5), hh = rand(3.4, 5);
+  const walls = new THREE.Mesh(new THREE.BoxGeometry(w, hh, d),
+    new THREE.MeshStandardMaterial({ color: [0x9a8f7d, 0x8d8578, 0xa39683][Math.floor(Math.random() * 3)], roughness: 0.95 }));
+  walls.position.y = hh / 2;
+  walls.castShadow = walls.receiveShadow = true;
+  g.add(walls);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 1.2, d * 0.62, d + 1.2),
+    new THREE.MeshStandardMaterial({ color: [0x7a4a3a, 0x5d5a52][Math.floor(Math.random() * 2)], roughness: 0.9, flatShading: true }));
+  roof.position.y = hh + d * 0.16;
+  roof.rotation.z = Math.PI / 4;
+  roof.castShadow = true;
+  g.add(roof);
+  g.position.set(spot.x, 0, spot.z);
+  g.rotation.y = rand(0, Math.PI * 2);
+  scene.add(g);
+  obstacles.push({ mesh: g, r: Math.max(w, d) * 0.62, h: hh + d * 0.5 });
+}
+
+function addRuins() {
+  const spot = findClearSpot(3.2, 24);
+  if (!spot) return;
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: 0x7c7568, roughness: 1, flatShading: true });
+  const n = 2 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < n; i++) {
+    const wh = rand(1.2, 2.8), wl = rand(2.5, 4.5);
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(wl, wh, 0.55), mat);
+    wall.position.set(rand(-1.5, 1.5), wh / 2, rand(-1.5, 1.5));
+    wall.rotation.y = i * Math.PI / 2 + rand(-0.3, 0.3);
+    wall.castShadow = wall.receiveShadow = true;
+    g.add(wall);
+  }
+  const rubble = new THREE.Mesh(new THREE.DodecahedronGeometry(rand(0.8, 1.4), 0), mat);
+  rubble.position.y = 0.5;
+  rubble.scale.y = 0.6;
+  g.add(rubble);
+  g.position.set(spot.x, 0, spot.z);
+  g.rotation.y = rand(0, Math.PI * 2);
+  scene.add(g);
+  obstacles.push({ mesh: g, r: 2.8, h: 3 });
 }
 
 function addObstacle() {
@@ -492,13 +623,9 @@ function addObstacle() {
     r = 0.9;
     hTop = h;
   }
-  let x, z, ok = false;
-  for (let t = 0; t < 20 && !ok; t++) {
-    x = rand(-WORLD_SIZE + 12, WORLD_SIZE - 12);
-    z = rand(-WORLD_SIZE + 12, WORLD_SIZE - 12);
-    ok = Math.hypot(x, z - 20) > 14 && obstacles.every(o => Math.hypot(o.mesh.position.x - x, o.mesh.position.z - z) > o.r + r + 3);
-  }
-  if (!ok) return;
+  const spot = findClearSpot(r, 18);
+  if (!spot) return;
+  const x = spot.x, z = spot.z;
   mesh.position.x = x; mesh.position.z = z;
   mesh.castShadow = mesh.receiveShadow = true;
   scene.add(mesh);
@@ -740,7 +867,8 @@ function buildTankModel(cfg) {
   }
 }
 
-function createTank(cfg, isPlayer) {
+function createTank(cfg, isPlayer, team) {
+  team = team || (isPlayer ? 'ally' : 'enemy');
   const group = new THREE.Group();
   group.scale.setScalar(cfg.scale || 1);
 
@@ -765,6 +893,7 @@ function createTank(cfg, isPlayer) {
       group, body, turret: glb.turret, pitch: glb.gun, muzzle: glb.muzzle,
       isGlb: true, gunBaseZ: glb.gun.position.z,
       isPlayer,
+      team,
       hp: cfg.hp,
       maxHp: cfg.hp,
       damage: cfg.damage || 1,
@@ -881,6 +1010,7 @@ function createTank(cfg, isPlayer) {
   return {
     group, body, turret, pitch, muzzle,
     isPlayer,
+    team,
     hp: cfg.hp,
     maxHp: cfg.hp,
     damage: cfg.damage || 1,
@@ -917,17 +1047,31 @@ function spawnEnemy() {
     reloadTime: Math.max(1.5, 2.4 - wave * 0.06),
     scale: rand(0.95, 1.08)
   }, false);
-  const ang = rand(0, Math.PI * 2);
-  const dist = rand(55, 75);
-  t.group.position.set(
-    clamp(player.group.position.x + Math.cos(ang) * dist, -WORLD_SIZE + 8, WORLD_SIZE - 8), 0,
-    clamp(player.group.position.z + Math.sin(ang) * dist, -WORLD_SIZE + 8, WORLD_SIZE - 8)
-  );
-  t.heading = rand(0, Math.PI * 2);
+  t.group.position.set(rand(-45, 45), 0, ENEMY_BASE_Z + rand(-8, 8));
+  t.heading = 0;
   t.group.rotation.y = t.heading;
   drawHpBar(t);
   scene.add(t.group);
   enemies.push(t);
+}
+
+function spawnAlly() {
+  const colors = [0x2e6f3e, 0x3a6a55, 0x35596b];
+  const t = createTank({
+    color: colors[Math.floor(Math.random() * colors.length)],
+    tint: 0.55,
+    model: MODEL_KEYS[Math.floor(Math.random() * MODEL_KEYS.length)],
+    hp: 4 + Math.floor(wave / 4),
+    damage: 1,
+    reloadTime: Math.max(1.8, 2.6 - wave * 0.05),
+    scale: rand(0.95, 1.08)
+  }, false, 'ally');
+  t.group.position.set(rand(-45, 45), 0, ALLY_BASE_Z + rand(-8, 8));
+  t.heading = Math.PI;
+  t.group.rotation.y = t.heading;
+  drawHpBar(t);
+  scene.add(t.group);
+  allies.push(t);
 }
 
 function switchTab(tab) {
@@ -1202,6 +1346,8 @@ function rebuildTankPreview() {
 
 function enterGarage() {
   state = 'garage';
+  for (const a of allies) scene.remove(a.group);
+  allies = [];
   document.getElementById('gameover').classList.add('hidden');
   document.getElementById('garage').classList.add('active');
   document.getElementById('hud').classList.add('hidden');
@@ -1227,6 +1373,8 @@ function startGame() {
 
   for (const t of enemies) scene.remove(t.group);
   enemies = [];
+  for (const a of allies) scene.remove(a.group);
+  allies = [];
   for (const s of shells) scene.remove(s.mesh);
   shells = [];
   for (const p of particles) scene.remove(p.mesh);
@@ -1236,17 +1384,18 @@ function startGame() {
   player.reload = 0;
   player.vel.set(0, 0, 0);
   player.barrelKick = 0;
-  player.group.position.set(0, 0, 20);
-  player.heading = 0;
-  player.group.rotation.y = 0;
+  player.group.position.set(0, 0, ALLY_BASE_Z - 12);
+  player.heading = Math.PI;
+  player.group.rotation.y = player.heading;
   player.body.rotation.set(0, 0, 0);
   player.turret.rotation.y = 0;
   player.pitch.rotation.x = 0;
+  while (allies.length < 5) spawnAlly();
 
   hangar.visible = false;
   sunLight.visible = true;
   hemiLight.intensity = 0.9;
-  scene.fog = new THREE.Fog(0x87a8bd, 60, 160);
+  scene.fog = new THREE.Fog(0x87a8bd, 80, 300);
   scene.background = new THREE.Color(0x87a8bd);
 
   boosterActive = false;
@@ -1304,7 +1453,7 @@ function fire(tank) {
 
   const shell = new THREE.Mesh(
     new THREE.CapsuleGeometry(0.13, 0.5, 4, 8),
-    new THREE.MeshStandardMaterial({ color: tank.isPlayer ? 0xffd166 : 0xff6b6b, emissive: tank.isPlayer ? 0x704d00 : 0x661111, emissiveIntensity: 2 })
+    new THREE.MeshStandardMaterial({ color: tank.team === 'ally' ? 0xffd166 : 0xff6b6b, emissive: tank.team === 'ally' ? 0x704d00 : 0x661111, emissiveIntensity: 2 })
   );
   shell.position.copy(muzzlePos);
   scene.add(shell);
@@ -1490,10 +1639,16 @@ function updatePlayer(dt) {
   if ((mouse.down || fireTouch || keys['Space']) && p.reload <= 0 && state === 'playing') fire(p);
 }
 
-function updateEnemy(t, dt) {
+function updateBot(t, dt, foes) {
   if (!t.alive) return;
-  const toPlayer = new THREE.Vector3().subVectors(player.group.position, t.group.position);
-  const dist = toPlayer.length();
+  let foe = null, dist = Infinity;
+  for (const f of foes) {
+    if (!f.alive) continue;
+    const d = t.group.position.distanceTo(f.group.position);
+    if (d < dist) { dist = d; foe = f; }
+  }
+  if (!foe) return;
+  const toPlayer = new THREE.Vector3().subVectors(foe.group.position, t.group.position);
   const idealRange = 22;
   const ai = t.ai;
 
@@ -1534,7 +1689,7 @@ function updateEnemy(t, dt) {
   t.pitch.rotation.x += (-elev - t.pitch.rotation.x) * Math.min(1, dt * 8);
 
   t.reload -= dt;
-  const aimed = Math.abs(adiff) < 0.12 && dist < 45 && player.alive;
+  const aimed = Math.abs(adiff) < 0.12 && dist < 45;
   if (aimed && t.reload <= 0) fire(t);
 }
 
@@ -1551,7 +1706,7 @@ function updateShells(dt) {
     if (!dead && s.mesh.position.y < 0.1) { dead = true; explode(s.mesh.position, false); }
 
     if (!dead) {
-      const targets = s.owner.isPlayer ? enemies : [player];
+      const targets = s.owner.team === 'enemy' ? [player].concat(allies) : enemies;
       for (const t of targets) {
         if (!t.alive) continue;
         const flat = Math.hypot(t.group.position.x - s.mesh.position.x, t.group.position.z - s.mesh.position.z);
@@ -1566,7 +1721,7 @@ function updateShells(dt) {
             t.alive = false;
             explode(t.group.position.clone().setY(1.2), true);
             scene.remove(t.group);
-            if (!t.isPlayer) {
+            if (s.owner.isPlayer && !t.isPlayer) {
               score += (100 + wave * 10) * (boosterActive ? 2 : 1);
               garage.credits += (40 + wave * 10) * (boosterActive ? 2 : 1);
               saveGarage();
@@ -1663,21 +1818,28 @@ function updateWaves(dt) {
     waveTimer -= dt;
     if (waveTimer <= 0) {
       wave++;
-      enemiesToSpawn = 2 + wave;
+      enemiesToSpawn = 6;
       spawnTimer = 0.5;
       waveTimer = 2.5;
       const banner = document.getElementById('wave-banner');
-      banner.textContent = 'Волна ' + wave;
+      banner.textContent = 'Волна ' + wave + ' · 6×6';
       banner.style.opacity = 1;
       setTimeout(() => banner.style.opacity = 0, 2000);
       score += 50 * (wave - 1);
       garage.credits += (50 + wave * 20) * (boosterActive ? 2 : 1);
       saveGarage();
+      for (let i = allies.length - 1; i >= 0; i--) {
+        if (!allies[i].alive) allies.splice(i, 1);
+      }
+      while (allies.length < 5) spawnAlly();
       if (player.alive) player.hp = Math.min(player.maxHp, player.hp + 1);
     }
   }
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (!enemies[i].alive) enemies.splice(i, 1);
+  }
+  for (let i = allies.length - 1; i >= 0; i--) {
+    if (!allies[i].alive) allies.splice(i, 1);
   }
 }
 
@@ -1719,6 +1881,8 @@ function updateHud() {
   document.getElementById('score').textContent = score;
   document.getElementById('wave').textContent = Math.max(wave, 1);
   document.getElementById('enemies').textContent = enemies.filter(e => e.alive).length + (enemiesToSpawn > 0 ? ' (+' + enemiesToSpawn + ')' : '');
+  document.getElementById('tb-ally').textContent = (player.alive ? 1 : 0) + allies.filter(a => a.alive).length;
+  document.getElementById('tb-enemy').textContent = enemies.filter(e => e.alive).length + (enemiesToSpawn > 0 ? '+' + enemiesToSpawn : '');
   document.getElementById('booster-chip').style.display = boosterActive ? 'block' : 'none';
 
   const c = document.getElementById('crosshair');
@@ -1737,6 +1901,14 @@ function drawMinimap() {
     ctx.fillStyle = 'rgba(160,160,160,.5)';
     ctx.fillRect(mx - 1.5, mz - 1.5, 3, 3);
   }
+  for (const a of allies) {
+    if (!a.alive) continue;
+    const [mx, mz] = toMap(a.group.position.x, a.group.position.z);
+    ctx.fillStyle = '#37d67a';
+    ctx.beginPath();
+    ctx.arc(mx, mz, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
   for (const e of enemies) {
     const [mx, mz] = toMap(e.group.position.x, e.group.position.z);
     ctx.fillStyle = '#ff5f5f';
@@ -1745,11 +1917,11 @@ function drawMinimap() {
     ctx.fill();
   }
   const [px, pz] = toMap(player.group.position.x, player.group.position.z);
-  ctx.fillStyle = '#37d67a';
+  ctx.fillStyle = '#ffffff';
   ctx.beginPath();
   ctx.arc(px, pz, 4, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = '#37d67a';
+  ctx.strokeStyle = '#ffffff';
   ctx.beginPath();
   ctx.moveTo(px, pz);
   ctx.lineTo(px + Math.sin(player.heading) * 9, pz + Math.cos(player.heading) * 9);
@@ -1762,7 +1934,8 @@ function animate() {
 
   if (state === 'playing') {
     updatePlayer(dt);
-    for (const e of enemies) updateEnemy(e, dt);
+    for (const e of enemies) updateBot(e, dt, [player].concat(allies));
+    for (const a of allies) updateBot(a, dt, enemies);
     updateShells(dt);
     updateWaves(dt);
     updateHud();
