@@ -83,6 +83,24 @@
   .container-card .box-icon { font-size: 44px; }
   .container-card .c-name { font-size: 17px; font-weight: 800; margin: 6px 0 4px; }
   .container-card .c-desc { font-size: 12px; color: #9fb3c0; line-height: 1.5; min-height: 52px; }
+  .c-chances { font-size: 11px; color: #6ec6ff; margin-top: 6px; }
+  .deal-badge { position: absolute; top: 8px; right: 8px; background: #b23a1a; color: #fff; font-size: 10px;
+    font-weight: 800; padding: 3px 8px; border-radius: 6px; letter-spacing: 1px; }
+  #controls-help { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 12px;
+    color: rgba(232,240,245,.6); background: rgba(8,14,20,.55); padding: 6px 14px; border-radius: 8px; white-space: nowrap; }
+  body.touch #controls-help { display: none; }
+  #touch-ui { position: absolute; inset: 0; pointer-events: none; }
+  #touch-ui.hidden { display: none; }
+  .stick { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: rgba(8,14,20,.4);
+    border: 2px solid rgba(110,198,255,.3); pointer-events: auto; touch-action: none; }
+  #stick-move { left: 26px; bottom: 34px; }
+  #stick-aim { right: 130px; bottom: 130px; }
+  .stick .knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px;
+    border-radius: 50%; background: rgba(110,198,255,.35); border: 2px solid rgba(110,198,255,.65); }
+  #btn-fire-touch { position: absolute; right: 36px; bottom: 30px; width: 86px; height: 86px; border-radius: 50%;
+    border: 2px solid rgba(255,120,90,.75); background: rgba(178,58,26,.4); color: #fff; font-size: 30px;
+    pointer-events: auto; touch-action: none; }
+  #btn-fire-touch:active { background: rgba(178,58,26,.75); }
   .skin-card { width: 150px; padding: 12px; border-radius: 10px; background: rgba(8,14,20,.88);
     border: 2px solid rgba(255,255,255,.12); text-align: center; }
   .skin-swatch { width: 100%; height: 44px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,.25); }
@@ -127,6 +145,12 @@
   <div class="wave-banner" id="wave-banner">Волна 1</div>
   <div id="crosshair"></div>
   <canvas id="minimap" width="170" height="170"></canvas>
+  <div id="controls-help">WASD — ехать · Мышь — прицел · ЛКМ / Пробел — огонь · Shift — ускорение</div>
+  <div id="touch-ui" class="hidden">
+    <div class="stick" id="stick-move"><div class="knob" id="knob-move"></div></div>
+    <div class="stick" id="stick-aim"><div class="knob" id="knob-aim"></div></div>
+    <button id="btn-fire-touch">🔥</button>
+  </div>
 </div>
 
 <div id="garage" class="active">
@@ -140,11 +164,13 @@
   <div class="garage-tabs">
     <button class="tab-btn active" id="tab-tanks">Танки</button>
     <button class="tab-btn" id="tab-shop">Магазин</button>
+    <button class="tab-btn" id="tab-deals">Акции</button>
     <button class="tab-btn" id="tab-storage">Хранилище</button>
   </div>
   <div class="stat-panel" id="stat-panel"></div>
   <div class="bottom-panel active" id="panel-tanks"></div>
   <div class="bottom-panel" id="panel-shop"></div>
+  <div class="bottom-panel" id="panel-deals"></div>
   <div class="bottom-panel" id="panel-storage"></div>
   <div class="hint-rotate" id="garage-hint">Витрина — зажми мышь и вращай, колёсико — приближение</div>
   <div class="garage-actions">
@@ -197,6 +223,10 @@ const rand = (a, b) => a + Math.random() * (b - a);
 let scene, camera, renderer, clock;
 let player, enemies = [], shells = [], obstacles = [], particles = [];
 let keys = {}, mouse = { x: 0, y: 0, down: false };
+const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
+const touchMove = { x: 0, y: 0 };
+const touchAim = { active: false, x: 0, y: 0, angle: 0, dist: 26 };
+let fireTouch = false;
 let aimPoint = null;
 let state = 'garage';
 let score = 0, wave = 0, waveTimer = 0, enemiesToSpawn = 0, spawnTimer = 0;
@@ -223,6 +253,17 @@ const SKINS = [
   { id: 'gold',   name: 'Золото',      color: 0xd4af37, rarity: 'epic',   metal: 0.9 }
 ];
 
+const DEALS = [
+  { id: 'starter',  icon: '🎁', name: 'Набор новичка',  desc: '+800 кредитов и Стандартный контейнер в хранилище', cost: 600,  once: true,
+    give: () => { garage.credits += 800; garage.containers.std += 1; } },
+  { id: 'bag',      icon: '💰', name: 'Мешок кредитов', desc: '+2500 кредитов сразу — выгоднее, чем фармить в бою', cost: 1000, once: false,
+    give: () => { garage.credits += 2500; } },
+  { id: 'hunter',   icon: '📦', name: 'Набор охотника', desc: '2 Редких контейнера в хранилище + бустер ×2', cost: 1500, once: true,
+    give: () => { garage.containers.rare += 2; if (garage.booster < 3) garage.booster += 1; } },
+  { id: 'master',   icon: '👑', name: 'Мастер-набор',   desc: '2 Элитных контейнера в хранилище + 3000 кредитов', cost: 4000, once: true,
+    give: () => { garage.containers.elite += 2; garage.credits += 3000; } }
+];
+
 const CONTAINERS = [
   { id: 'std',   name: 'Стандартный', cost: 300,  icon: '📦',
     desc: 'Кредиты, обычный камуфляж или бустер ×2',
@@ -235,7 +276,7 @@ const CONTAINERS = [
     rolls: [ { type: 'credits', min: 500, max: 1200, chance: 0.40 }, { type: 'skin', rarity: 'epic', chance: 0.42 }, { type: 'booster', chance: 0.18 } ] }
 ];
 
-let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0 };
+let garage = { credits: 0, unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [] };
 try {
   const saved = JSON.parse(localStorage.getItem('modernTanksSave2') || '{}');
   if (Number.isFinite(saved.credits)) garage.credits = saved.credits;
@@ -244,12 +285,15 @@ try {
   if (Array.isArray(saved.skinsOwned)) garage.skinsOwned = saved.skinsOwned;
   if (saved.equipped && typeof saved.equipped === 'object') garage.equipped = saved.equipped;
   if (Number.isFinite(saved.booster)) garage.booster = saved.booster;
+  if (saved.containers && typeof saved.containers === 'object') garage.containers = Object.assign(garage.containers, saved.containers);
+  if (Array.isArray(saved.dealsOwned)) garage.dealsOwned = saved.dealsOwned;
 } catch (e) { /* сохранение недоступно */ }
 function saveGarage() {
   try {
     localStorage.setItem('modernTanksSave2', JSON.stringify({
       credits: garage.credits, unlocked: garage.unlocked, selected: garage.selected,
-      skinsOwned: garage.skinsOwned, equipped: garage.equipped, booster: garage.booster
+      skinsOwned: garage.skinsOwned, equipped: garage.equipped, booster: garage.booster,
+      containers: garage.containers, dealsOwned: garage.dealsOwned
     }));
   } catch (e) { /* сохранение недоступно */ }
 }
@@ -325,12 +369,59 @@ function init() {
   document.getElementById('btn-buy').addEventListener('click', buySelectedTank);
   document.getElementById('tab-tanks').addEventListener('click', () => switchTab('tanks'));
   document.getElementById('tab-shop').addEventListener('click', () => switchTab('shop'));
+  document.getElementById('tab-deals').addEventListener('click', () => switchTab('deals'));
   document.getElementById('tab-storage').addEventListener('click', () => switchTab('storage'));
+
+  if (IS_TOUCH) {
+    document.body.classList.add('touch');
+    bindStick(document.getElementById('stick-move'), document.getElementById('knob-move'),
+      (x, y) => { touchMove.x = x; touchMove.y = y; },
+      () => { touchMove.x = 0; touchMove.y = 0; });
+    bindStick(document.getElementById('stick-aim'), document.getElementById('knob-aim'),
+      (x, y) => { touchAim.active = true; touchAim.x = x; touchAim.y = y; },
+      () => { touchAim.active = false; touchAim.x = 0; touchAim.y = 0; });
+    const fireBtn = document.getElementById('btn-fire-touch');
+    fireBtn.addEventListener('touchstart', e => { e.preventDefault(); fireTouch = true; }, { passive: false });
+    fireBtn.addEventListener('touchend', e => { e.preventDefault(); fireTouch = false; }, { passive: false });
+    fireBtn.addEventListener('touchcancel', () => { fireTouch = false; });
+  }
 
   window.__mtReady = true;
   document.getElementById('loading').style.display = 'none';
   enterGarage();
   animate();
+}
+
+function bindStick(el, knob, onMove, onEnd) {
+  let tid = null, cx = 0, cy = 0;
+  const R = 46;
+  const handle = (t) => {
+    let dx = t.clientX - cx, dy = t.clientY - cy;
+    const d = Math.hypot(dx, dy);
+    if (d > R) { dx = dx / d * R; dy = dy / d * R; }
+    knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    onMove(dx / R, dy / R);
+  };
+  el.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    tid = t.identifier;
+    const r = el.getBoundingClientRect();
+    cx = r.left + r.width / 2; cy = r.top + r.height / 2;
+    handle(t);
+  }, { passive: false });
+  el.addEventListener('touchmove', e => {
+    for (const t of e.changedTouches) if (t.identifier === tid) { e.preventDefault(); handle(t); }
+  }, { passive: false });
+  const end = e => {
+    for (const t of e.changedTouches) if (t.identifier === tid) {
+      tid = null;
+      knob.style.transform = 'translate(0,0)';
+      onEnd();
+    }
+  };
+  el.addEventListener('touchend', end);
+  el.addEventListener('touchcancel', end);
 }
 
 function onMouseMove(e) {
@@ -842,9 +933,11 @@ function spawnEnemy() {
 function switchTab(tab) {
   document.getElementById('tab-tanks').classList.toggle('active', tab === 'tanks');
   document.getElementById('tab-shop').classList.toggle('active', tab === 'shop');
+  document.getElementById('tab-deals').classList.toggle('active', tab === 'deals');
   document.getElementById('tab-storage').classList.toggle('active', tab === 'storage');
   document.getElementById('panel-tanks').classList.toggle('active', tab === 'tanks');
   document.getElementById('panel-shop').classList.toggle('active', tab === 'shop');
+  document.getElementById('panel-deals').classList.toggle('active', tab === 'deals');
   document.getElementById('panel-storage').classList.toggle('active', tab === 'storage');
   document.getElementById('stat-panel').classList.toggle('hidden', tab !== 'tanks');
   document.getElementById('garage-hint').style.display = tab === 'tanks' ? '' : 'none';
@@ -864,9 +957,14 @@ function buySelectedTank() {
   }
 }
 
-function openContainer(c) {
-  if (garage.credits < c.cost) return;
-  garage.credits -= c.cost;
+function openContainer(c, free) {
+  if (!free) {
+    if (garage.credits < c.cost) return;
+    garage.credits -= c.cost;
+  } else {
+    if ((garage.containers[c.id] || 0) <= 0) return;
+    garage.containers[c.id] -= 1;
+  }
   const roll = Math.random();
   let acc = 0;
   let reward = c.rolls[c.rolls.length - 1];
@@ -966,9 +1064,11 @@ function renderGarage() {
   for (const c of CONTAINERS) {
     const card = document.createElement('div');
     card.className = 'container-card';
+    const chances = c.rolls.map(r => Math.round(r.chance * 100) + '% ' + ({ credits: 'кредиты', skin: 'камуфляж', booster: 'бустер' })[r.type]).join(' · ');
     card.innerHTML = '<div class="box-icon">' + c.icon + '</div>' +
       '<div class="c-name">' + c.name + '</div>' +
       '<div class="c-desc">' + c.desc + '</div>' +
+      '<div class="c-chances">Шансы: ' + chances + '</div>' +
       '<div class="tank-cost">⬤ ' + c.cost + '</div>';
     const btn = document.createElement('button');
     btn.className = 'btn small';
@@ -976,13 +1076,61 @@ function renderGarage() {
     btn.style.width = '100%';
     btn.textContent = 'Открыть';
     btn.disabled = garage.credits < c.cost;
-    btn.addEventListener('click', () => openContainer(c));
+    btn.addEventListener('click', () => { openContainer(c); renderGarage(); });
     card.appendChild(btn);
     shopPanel.appendChild(card);
   }
 
+  const dealsPanel = document.getElementById('panel-deals');
+  dealsPanel.innerHTML = '';
+  for (const d of DEALS) {
+    const owned = d.once && garage.dealsOwned.includes(d.id);
+    const card = document.createElement('div');
+    card.className = 'container-card';
+    card.style.position = 'relative';
+    card.innerHTML = '<div class="deal-badge">' + (d.once ? '×1' : 'ВСЕГДА') + '</div>' +
+      '<div class="box-icon">' + d.icon + '</div>' +
+      '<div class="c-name">' + d.name + '</div>' +
+      '<div class="c-desc">' + d.desc + '</div>' +
+      '<div class="tank-cost">⬤ ' + d.cost + '</div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.style.marginTop = '8px';
+    btn.style.width = '100%';
+    btn.textContent = owned ? 'Куплено ✓' : (garage.credits >= d.cost ? 'Купить' : 'Не хватает ⬤ ' + (d.cost - garage.credits));
+    btn.disabled = owned || garage.credits < d.cost;
+    btn.addEventListener('click', () => {
+      if (owned || garage.credits < d.cost) return;
+      garage.credits -= d.cost;
+      d.give();
+      if (d.once) garage.dealsOwned.push(d.id);
+      saveGarage();
+      playSound('hit');
+      renderGarage();
+    });
+    card.appendChild(btn);
+    dealsPanel.appendChild(card);
+  }
+
   const storagePanel = document.getElementById('panel-storage');
   storagePanel.innerHTML = '';
+  for (const c of CONTAINERS) {
+    const count = garage.containers[c.id] || 0;
+    if (!count) continue;
+    const card = document.createElement('div');
+    card.className = 'container-card';
+    card.innerHTML = '<div class="box-icon">' + c.icon + '</div>' +
+      '<div class="c-name">' + c.name + ' ×' + count + '</div>' +
+      '<div class="c-desc">Контейнер из акций. Откроется бесплатно.</div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.style.marginTop = '8px';
+    btn.style.width = '100%';
+    btn.textContent = 'Открыть';
+    btn.addEventListener('click', () => { openContainer(c, true); renderGarage(); });
+    card.appendChild(btn);
+    storagePanel.appendChild(card);
+  }
   if (garage.booster > 0) {
     const b = document.createElement('div');
     b.className = 'skin-card';
@@ -991,7 +1139,7 @@ function renderGarage() {
       '<div class="c-desc" style="font-size:12px">Кредиты ×2 в следующем бою. Зарядов: ' + garage.booster + '</div>';
     storagePanel.appendChild(b);
   }
-  if (!garage.skinsOwned.length && garage.booster === 0) {
+  if (!garage.skinsOwned.length && garage.booster === 0 && !(garage.containers.std || garage.containers.rare || garage.containers.elite)) {
     const empty = document.createElement('div');
     empty.className = 'tank-desc';
     empty.style.textAlign = 'center';
@@ -1059,6 +1207,9 @@ function enterGarage() {
   document.getElementById('hud').classList.add('hidden');
   document.body.style.cursor = 'default';
   document.getElementById('crosshair').style.display = 'none';
+  document.getElementById('touch-ui').classList.add('hidden');
+  fireTouch = false;
+  touchMove.x = 0; touchMove.y = 0;
   hangar.visible = true;
   sunLight.visible = false;
   hemiLight.intensity = 0.25;
@@ -1110,7 +1261,8 @@ function startGame() {
   waveTimer = 1.2;
   state = 'playing';
   document.body.style.cursor = 'none';
-  document.getElementById('crosshair').style.display = 'block';
+  document.getElementById('crosshair').style.display = IS_TOUCH ? 'none' : 'block';
+  document.getElementById('touch-ui').classList.toggle('hidden', !IS_TOUCH);
   document.getElementById('hud').classList.remove('hidden');
   updateHud();
 }
@@ -1118,6 +1270,9 @@ function startGame() {
 function gameOver() {
   state = 'gameover';
   saveGarage();
+  document.getElementById('touch-ui').classList.add('hidden');
+  fireTouch = false;
+  touchMove.x = 0; touchMove.y = 0;
   document.body.style.cursor = 'default';
   document.getElementById('crosshair').style.display = 'none';
   document.getElementById('final-score').textContent = 'Счёт: ' + score;
@@ -1256,6 +1411,8 @@ function updatePlayer(dt) {
   let input = 0;
   if (keys['KeyW'] || keys['ArrowUp']) input += 1;
   if (keys['KeyS'] || keys['ArrowDown']) input -= 1;
+  input += -touchMove.y;
+  input = clamp(input, -1, 1);
   if (input !== 0) vLong += input * 30 * boost * dt;
   vLong *= Math.pow(0.5, dt);
   vLong = clamp(vLong, -maxSpeed * 0.5, maxSpeed);
@@ -1264,6 +1421,8 @@ function updatePlayer(dt) {
   let turn = 0;
   if (keys['KeyA'] || keys['ArrowLeft']) turn += 1;
   if (keys['KeyD'] || keys['ArrowRight']) turn -= 1;
+  turn += -touchMove.x;
+  turn = clamp(turn, -1, 1);
   const steerAuth = 0.4 + 0.6 * Math.min(1, Math.abs(vLong) / 5);
   const turnRate = cfg.turn * steerAuth * (vLong < -0.5 ? -1 : 1);
   p.heading += turn * turnRate * dt;
@@ -1296,12 +1455,24 @@ function updatePlayer(dt) {
   p.barrelKick = Math.max(0, p.barrelKick - dt * 2.2);
   p.pitch.position.z = p.isGlb ? p.gunBaseZ - p.barrelKick * 0.9 : 1.0 - p.barrelKick * 0.6;
 
-  groundRay.setFromCamera(new THREE.Vector2(
-    (mouse.x / innerWidth) * 2 - 1, -(mouse.y / innerHeight) * 2 + 1
-  ), camera);
-  const hit = new THREE.Vector3();
-  if (groundRay.ray.intersectPlane(groundPlane, hit)) {
-    aimPoint.lerp(hit, 0.5);
+  if (IS_TOUCH) {
+    if (touchAim.active) {
+      touchAim.angle -= touchAim.x * 2.6 * dt;
+      touchAim.dist = clamp(touchAim.dist - touchAim.y * 30 * dt, 12, 45);
+    }
+    aimPoint.set(
+      p.group.position.x + Math.sin(touchAim.angle) * touchAim.dist,
+      0,
+      p.group.position.z + Math.cos(touchAim.angle) * touchAim.dist
+    );
+  } else {
+    groundRay.setFromCamera(new THREE.Vector2(
+      (mouse.x / innerWidth) * 2 - 1, -(mouse.y / innerHeight) * 2 + 1
+    ), camera);
+    const hit = new THREE.Vector3();
+    if (groundRay.ray.intersectPlane(groundPlane, hit)) {
+      aimPoint.lerp(hit, 0.5);
+    }
   }
   const dx = aimPoint.x - p.group.position.x;
   const dz = aimPoint.z - p.group.position.z;
@@ -1316,7 +1487,7 @@ function updatePlayer(dt) {
   p.pitch.rotation.x += (-elev - p.pitch.rotation.x) * Math.min(1, dt * 8);
 
   p.reload -= dt;
-  if ((mouse.down || keys['Space']) && p.reload <= 0 && state === 'playing') fire(p);
+  if ((mouse.down || fireTouch || keys['Space']) && p.reload <= 0 && state === 'playing') fire(p);
 }
 
 function updateEnemy(t, dt) {
