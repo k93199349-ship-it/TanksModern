@@ -662,7 +662,7 @@ let player, enemies = [], allies = [], shells = [], obstacles = [], particles = 
 let keys = {}, mouse = { x: 0, y: 0, down: false };
 const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
 const touchMove = { x: 0, y: 0 };
-let autoAim = true;
+let autoAim = false;
 let camYaw = Math.PI;
 let camDist = 9;
 let earAllyKey = '';
@@ -820,7 +820,7 @@ function modeMult() { return garage.battleMode === 'storm' ? 1.5 : 1; }
 function modeLabel() {
   return '<span class="mode-dot"></span>' + (garage.battleMode === 'storm' ? 'Штурм · награда ×1.5' : 'Обычный бой');
 }
-let garage = { credits: 0, gold: 50, freeXp: 0, nickname: 'Командир', unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [], crew: { cmd: 1, aim: 1, drv: 1, ldr: 1 }, tasks: null, accountKills: 0, settings: { shake: true, shadows: true }, battleMode: 'normal', filter: 'all' };
+let garage = { credits: 0, gold: 50, freeXp: 0, nickname: 'Командир', unlocked: ['scout'], selected: 'scout', skinsOwned: [], equipped: {}, booster: 0, containers: { std: 0, rare: 0, elite: 0 }, dealsOwned: [], crew: { cmd: 1, aim: 1, drv: 1, ldr: 1 }, tasks: null, accountKills: 0, settings: { shake: true, shadows: true, quality: 'high', sens: 1, renderScale: 1 }, battleMode: 'normal', filter: 'all' };
 try {
   const saved = JSON.parse(localStorage.getItem('modernTanksSave2') || '{}');
   if (Number.isFinite(saved.credits)) garage.credits = saved.credits;
@@ -1324,9 +1324,11 @@ function buildWorld() {
   addRoads();
   addHills();
   for (let i = 0; i < 3; i++) addPond();
-  for (let i = 0; i < 22; i++) addHouse();
+  for (let i = 0; i < 18; i++) addHouse();
+  for (const [vx, vz] of [[24, 26], [-26, 22], [30, -18], [-20, -28], [4, 32], [-6, -34]]) addHouse(vx, vz);
   for (let i = 0; i < 16; i++) addRuins();
   for (let i = 0; i < 26; i++) addObstacle();
+  addRockRidges();
   addForest();
   addBushField();
   scatterRocks();
@@ -1340,6 +1342,30 @@ function buildWorld() {
   for (let i = 0; i < 8; i++) addBarrels();
   for (let i = 0; i < 5; i++) addTower();
   for (let i = 0; i < 24; i++) addDirtPatch();
+}
+
+function addRockRidges() {
+  const mat = new THREE.MeshStandardMaterial({ color: 0x7a736c, roughness: 1, flatShading: true });
+  for (let i = 0; i < 5; i++) {
+    const c = findClearSpot(8, 34);
+    if (!c) continue;
+    const ang = rand(0, Math.PI * 2), n = 5 + Math.floor(Math.random() * 4);
+    for (let j = 0; j < n; j++) {
+      const d = (j - n / 2) * rand(4, 6.5);
+      const x = c.x + Math.cos(ang) * d, z = c.z + Math.sin(ang) * d;
+      if (Math.abs(Math.abs(x) - 60) < 11 || Math.abs(z) < 12 || Math.abs(Math.abs(z) - 120) < 11) continue;
+      if (Math.abs(x) > WORLD_SIZE - 12 || Math.abs(z) > WORLD_SIZE - 12) continue;
+      if (ponds.some(p => Math.hypot(p.x - x, p.z - z) < p.r + 6)) continue;
+      const s = rand(1.8, 3.4);
+      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(s, 0), mat);
+      rock.position.set(x, s * 0.5, z);
+      rock.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3));
+      rock.scale.y = 0.75;
+      rock.castShadow = rock.receiveShadow = true;
+      scene.add(rock);
+      obstacles.push({ mesh: rock, r: s * 0.85, h: s });
+    }
+  }
 }
 
 function addHills() {
@@ -1575,8 +1601,8 @@ function addPond() {
   makeInstanced(reedGeo, reedMat, reeds, false);
 }
 
-function addHouse() {
-  const spot = findClearSpot(4.6, 26);
+function addHouse(fx, fz) {
+  const spot = fx !== undefined ? { x: fx, z: fz } : findClearSpot(4.6, 26);
   if (!spot) return;
   const g = new THREE.Group();
   const w = rand(5.5, 8.5), d = rand(5, 7.5), hh = rand(3.4, 5);
@@ -2999,11 +3025,90 @@ function renderCrew() {
 
 function renderSettings() {
   const panel = document.getElementById('panel-settings');
-  const rows = [
-    { key: 'shake', name: 'Тряска камеры' },
-    { key: 'shadows', name: 'Тени' }
-  ];
+  const st = garage.settings;
   panel.innerHTML = '';
+
+  const qRow = document.createElement('div');
+  qRow.className = 'setting-row';
+  qRow.style.flexWrap = 'wrap';
+  qRow.style.justifyContent = 'center';
+  qRow.style.gap = '6px';
+  const qLabel = document.createElement('div');
+  qLabel.style.cssText = 'width:100%;text-align:center;color:#8fa3b5;font-size:12px;margin-bottom:2px';
+  qLabel.textContent = 'Качество графики';
+  qRow.appendChild(qLabel);
+  const qDefs = [['low', 'Низкая'], ['medium', 'Средняя'], ['high', 'Высокая'], ['ultra', 'Ультра'], ['custom', 'Своя']];
+  for (const [q, name] of qDefs) {
+    const b = document.createElement('button');
+    b.className = 'filter-chip' + ((st.quality || 'high') === q ? ' active' : '');
+    b.textContent = name;
+    b.style.cssText = 'padding:5px 10px;font-size:12px';
+    b.addEventListener('click', () => {
+      st.quality = q;
+      if (q !== 'custom') st.renderScale = 1;
+      applySettings();
+      saveGarage();
+      renderGarage();
+    });
+    qRow.appendChild(b);
+  }
+  panel.appendChild(qRow);
+
+  if (st.quality === 'custom') {
+    const cRow = document.createElement('div');
+    cRow.className = 'setting-row';
+    cRow.innerHTML = '<span>Разрешение \u00d7' + (st.renderScale || 1).toFixed(2) + '</span>';
+    const sl = document.createElement('input');
+    sl.type = 'range';
+    sl.min = 0.4; sl.max = 1.5; sl.step = 0.05;
+    sl.value = st.renderScale || 1;
+    sl.style.cssText = 'width:150px;accent-color:#37d67a';
+    sl.addEventListener('input', () => {
+      st.renderScale = parseFloat(sl.value);
+      cRow.querySelector('span').textContent = 'Разрешение \u00d7' + st.renderScale.toFixed(2);
+      applySettings();
+      saveGarage();
+    });
+    cRow.appendChild(sl);
+    panel.appendChild(cRow);
+    const sRow = document.createElement('div');
+    sRow.className = 'setting-row';
+    sRow.innerHTML = '<span>Тени</span>';
+    const tg = document.createElement('div');
+    tg.className = 'toggle' + (st.shadows ? ' on' : '');
+    tg.addEventListener('click', () => {
+      st.shadows = !st.shadows;
+      applySettings();
+      saveGarage();
+      renderGarage();
+    });
+    sRow.appendChild(tg);
+    panel.appendChild(sRow);
+  }
+
+  const nRow = document.createElement('div');
+  nRow.className = 'setting-row';
+  nRow.innerHTML = '<span>Чувствительность прицела</span>';
+  const sens = document.createElement('input');
+  sens.type = 'range';
+  sens.min = 0.3; sens.max = 2.5; sens.step = 0.1;
+  sens.value = st.sens || 1;
+  sens.style.cssText = 'width:150px;accent-color:#37d67a';
+  const sVal = document.createElement('span');
+  sVal.style.cssText = 'width:34px;text-align:right;color:#ffd166';
+  sVal.textContent = (st.sens || 1).toFixed(1);
+  sens.addEventListener('input', () => {
+    st.sens = parseFloat(sens.value);
+    sVal.textContent = st.sens.toFixed(1);
+    saveGarage();
+  });
+  nRow.appendChild(sens);
+  nRow.appendChild(sVal);
+  panel.appendChild(nRow);
+
+  const rows = [
+    { key: 'shake', name: 'Тряска камеры' }
+  ];
   for (const r of rows) {
     const row = document.createElement('div');
     row.className = 'setting-row';
@@ -3023,7 +3128,22 @@ function renderSettings() {
 
 function applySettings() {
   if (typeof renderer === 'undefined' || !renderer) return;
-  renderer.shadowMap.enabled = garage.settings.shadows;
+  const st = garage.settings;
+  const base = Math.min(devicePixelRatio || 1, 2);
+  const q = st.quality || 'high';
+  const scale = q === 'custom' ? (st.renderScale !== undefined ? st.renderScale : 1)
+    : ({ low: 0.55, medium: 0.75, high: 1, ultra: 1 })[q] || 1;
+  renderer.setPixelRatio(base * scale);
+  const shadowsOn = q === 'custom' ? !!st.shadows : q !== 'low';
+  renderer.shadowMap.enabled = shadowsOn;
+  const ms = q === 'ultra' ? 4096 : (q === 'high' || q === 'custom') ? 2048 : 1024;
+  if (typeof sunLight !== 'undefined' && sunLight) {
+    sunLight.castShadow = shadowsOn;
+    if (sunLight.shadow.mapSize.x !== ms) {
+      sunLight.shadow.mapSize.set(ms, ms);
+      if (sunLight.shadow.map) { sunLight.shadow.map.dispose(); sunLight.shadow.map = null; }
+    }
+  }
   if (typeof scene !== 'undefined' && scene) scene.traverse(o => { if (o.material) o.material.needsUpdate = true; });
 }
 
@@ -3447,7 +3567,7 @@ function updatePlayer(dt) {
 
   if (IS_TOUCH) {
     if (touchAim.active) {
-      touchAim.angle -= touchAim.x * 2.6 * dt;
+      touchAim.angle -= touchAim.x * 2.6 * dt * (garage.settings.sens || 1);
       touchAim.dist = clamp(touchAim.dist - touchAim.y * 30 * dt, 12, 45);
     }
     aimPoint.set(
