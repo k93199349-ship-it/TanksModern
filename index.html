@@ -480,6 +480,65 @@
     #btn-ammo { bottom: 224px; }
     #ammo-panel { bottom: 268px; width: 200px; }
   }
+  #shop-full, #depot-full { position: fixed; inset: 0; z-index: 45; background: linear-gradient(160deg, #1c2331 0%, #26304a 55%, #1a2130 100%); display: none; flex-direction: column; }
+  #shop-full.open, #depot-full.open { display: flex; }
+  .sf-head { display: flex; align-items: center; gap: 14px; padding: 12px 16px 8px; }
+  .sf-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #ffd166; text-shadow: 0 2px 10px rgba(0,0,0,.5); }
+  .sf-close { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.1); color: #fff; font-size: 18px; border: 1px solid rgba(255,255,255,.2); }
+  .sf-tabs { display: flex; gap: 8px; padding: 0 16px 10px; flex-wrap: wrap; }
+  .sf-tab { padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #cfd8e6; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .sf-tab.active { background: linear-gradient(180deg, #ffd166, #f2b705); color: #10151a; border-color: transparent; }
+  .sf-body { flex: 1; overflow-y: auto; padding: 4px 16px 20px; display: flex; flex-wrap: wrap; gap: 12px; align-content: flex-start; }
+  .sf-banner { position: relative; width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.4); margin-bottom: 4px; }
+  .sf-banner img { width: 100%; height: 112px; object-fit: cover; opacity: .9; display: block; }
+  .sf-banner .sfb-t { position: absolute; top: 10px; left: 14px; font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px #000; letter-spacing: 1px; }
+  .sf-banner .sfb-s { position: absolute; top: 42px; left: 14px; font-size: 13px; color: #ffe9a8; text-shadow: 0 1px 6px #000; }
+  .sf-card { position: relative; width: 218px; border-radius: 14px; overflow: hidden; background: linear-gradient(165deg, #2a3448, #1d2536); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+  .sf-card img { width: 100%; height: 110px; object-fit: cover; display: block; }
+  .sf-card .sc-body { padding: 8px 10px 10px; }
+  .sf-card .sc-name { font-size: 14px; font-weight: 800; color: #fff; }
+  .sf-card .sc-sub { font-size: 11px; color: #9fb2cc; margin-top: 2px; }
+  .sf-card .sc-price { font-size: 13px; font-weight: 800; color: #ffd166; margin-top: 5px; }
+  .sf-card .off-badge { position: absolute; top: 8px; left: 8px; background: linear-gradient(90deg, #ff5252, #ff8a3d); color: #fff; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 8px; }
+  .sf-card .tag-badge { position: absolute; top: 8px; right: 8px; background: linear-gradient(90deg, #ffd166, #ff9d3d); color: #3a2500; font-size: 10px; font-weight: 900; padding: 3px 8px; border-radius: 8px; }
+  .sf-card .coll-badge { position: absolute; top: 8px; left: 8px; }
+  .sf-wide { width: 320px; }
+  #mm-overlay { position: fixed; inset: 0; z-index: 46; background: radial-gradient(ellipse at center, #16202e 0%, #070b12 80%); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+  #mm-overlay.open { display: flex; }
+  .mm-title { font-size: 24px; font-weight: 900; color: #ffd166; letter-spacing: 2px; animation: mmPulse 1.3s ease infinite; }
+  @keyframes mmPulse { 50% { opacity: .55; } }
+  .mm-map { font-size: 15px; color: #9fc3e8; }
+  .mm-cols { display: flex; gap: 24px; }
+  .mm-col { width: 216px; }
+  .mm-col-title { text-align: center; font-size: 12px; font-weight: 800; padding: 5px; border-radius: 8px; margin-bottom: 7px; letter-spacing: 1px; }
+  .mm-col.ally .mm-col-title { background: rgba(53,121,201,.35); color: #9cc8ff; }
+  .mm-col.enemy .mm-col-title { background: rgba(201,53,53,.35); color: #ff9c9c; }
+  .mm-slot { display: flex; align-items: center; gap: 8px; padding: 5px 8px; margin-bottom: 5px; border-radius: 8px; background: rgba(255,255,255,.05); min-height: 28px; font-size: 11px; color: #dfe8f4; }
+  .mm-slot.empty { opacity: .3; }
+  .mm-slot .dot { width: 8px; height: 8px; border-radius: 50%; background: #57a0ff; flex: none; }
+  .mm-slot.enemy .dot { background: #ff6161; }
+  .mm-timer { font-size: 14px; color: #8fa4bd; }
+  .mm-found { font-size: 28px; font-weight: 900; color: #7dff9e; letter-spacing: 3px; }
+  .mm-found.hidden { display: none; }
+  .top-actions { display: flex; gap: 8px; margin-right: 10px; }
+  .ta-btn { padding: 9px 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 12px; border: 1px solid rgba(255,255,255,.25); box-shadow: 0 4px 12px rgba(0,0,0,.35); white-space: nowrap; }
+  #btn-shop-top { background: linear-gradient(180deg, #d8862e, #9c5a1d); }
+  #btn-depot-top { background: linear-gradient(180deg, #6f42b8, #46277e); }
+  #loading .load-logo, #loading .load-logo-sub, #loading .load-track, #loading #loading-status { position: relative; z-index: 3; }
+  .load-bg { position: absolute; inset: -20%; z-index: 0; background: linear-gradient(125deg, #14202c, #1d3a52, #16324a, #2a1a3e, #14202c); background-size: 400% 400%; animation: loadAurora 14s ease infinite; }
+  @keyframes loadAurora { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  .load-slides { position: absolute; inset: 0; z-index: 0; }
+  .load-slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: loadSlide 18s ease infinite; }
+  .load-slides img:nth-child(2) { animation-delay: 6s; }
+  .load-slides img:nth-child(3) { animation-delay: 12s; }
+  @keyframes loadSlide { 0% { opacity: 0; transform: scale(1.08); } 8% { opacity: .45; } 33% { opacity: .45; } 45% { opacity: 0; transform: scale(1.16); } 100% { opacity: 0; } }
+  .load-dim { position: absolute; inset: 0; z-index: 1; background: rgba(5,9,14,.55); }
+  .load-snow { position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.85), transparent), radial-gradient(2px 2px at 90px 130px, rgba(255,255,255,.6), transparent), radial-gradient(1.5px 1.5px at 160px 60px, rgba(255,255,255,.8), transparent), radial-gradient(2.5px 2.5px at 60px 180px, rgba(255,255,255,.5), transparent), radial-gradient(1.5px 1.5px at 200px 100px, rgba(255,255,255,.7), transparent); background-size: 240px 240px; animation: loadSnow 9s linear infinite; }
+  @keyframes loadSnow { from { background-position: 0 0; } to { background-position: 0 480px; } }  .sf-sec { width: 100%; font-size: 13px; font-weight: 900; letter-spacing: 1.2px; color: #ffd166; margin-top: 8px; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+  .sf-grid { width: 100%; display: flex; flex-wrap: wrap; gap: 12px; }
+  .sf-card .btn.small { margin: 0 10px 10px; width: calc(100% - 20px); }
+  .sf-card.owned { border-color: rgba(90,200,120,.5); }
+  .sf-note { width: 100%; text-align: center; color: #9fb2cc; font-size: 13px; padding: 24px 0; }
 </style>
 </head>
 <body>
@@ -487,6 +546,10 @@
 <div id="vignette"></div>
 <div id="scope" class="hidden"><div class="scope-line v"></div><div class="scope-line h"></div></div>
 <div id="loading">
+  <div class="load-bg"></div>
+  <div class="load-slides" id="load-slides"></div>
+  <div class="load-dim"></div>
+  <div class="load-snow"></div>
   <div class="load-logo">MODERN <span class="accent">TANKS</span></div>
   <div class="load-logo-sub">Загрузка базы</div>
   <div class="load-track"><div></div></div>
@@ -541,6 +604,10 @@
         <button class="event-chip gold-chip" id="event-bp"><b>Боевой пропуск</b><span>Эпизод · награды</span></button>
       </div>
     </div>
+    <div class="top-actions">
+      <button class="ta-btn" id="btn-shop-top">🛒 МАГАЗИН</button>
+      <button class="ta-btn" id="btn-depot-top">📦 ХРАНИЛИЩЕ</button>
+    </div>
     <div class="player-block">
       <button class="player-row" id="player-row">
         <span class="pb-info">
@@ -555,10 +622,8 @@
   </div>
   <div class="garage-side">
     <button class="side-btn active" id="tab-tanks"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 14h18l-1.5 4.5H4.5z"/><rect x="7" y="9.5" width="9" height="4" rx="1"/><path d="M16 11.5h5"/><path d="M6 18.5h.01M10 18.5h.01M14 18.5h.01M18 18.5h.01"/></svg></span>Танки</button>
-    <button class="side-btn" id="tab-shop"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 4h2l2.3 11.5h10.2L20 7.5H6"/></svg></span>Магазин</button>
     <button class="side-btn" id="tab-event" style="color:#bfe3ff"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/><circle cx="12" cy="12" r="2"/></svg></span>Ярмарка</button>
     <button class="side-btn" id="tab-deals"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.5l-7 7a2 2 0 01-2.8 0L4 13.7V4h9.7l6.8 6.8a2 2 0 010 2.7z"/><circle cx="8.5" cy="8.5" r="1.4"/></svg></span>Акции</button>
-    <button class="side-btn" id="tab-storage"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><rect x="4" y="7.5" width="16" height="12.5" rx="1.2"/><path d="M4 12.5h16M12 7.5V20M7.5 7.5L9 3.5h6l1.5 4"/></svg></span>Хранилище</button>
     <button class="side-btn" id="tab-tree"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><circle cx="5" cy="5" r="2.2"/><circle cx="19" cy="12" r="2.2"/><circle cx="5" cy="19" r="2.2"/><path d="M7.2 5.6H13a4 4 0 014 4v.2M7.2 18.4H13a4 4 0 004-4v-.2"/></svg></span>Ветка</button>
     <button class="side-btn" id="tab-tasks"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></svg></span>Задачи</button>
     <button class="side-btn" id="tab-crew"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ><circle cx="9" cy="8" r="3"/><path d="M3.5 20c.5-3.2 2.6-5 5.5-5s5 1.8 5.5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M16 15.2c2.5.2 4.1 1.9 4.5 4.3"/></svg></span>Экипаж</button>
@@ -606,6 +671,47 @@
 <div id="battle-intro" class="hidden">
   <div class="bi-title">В БОЙ!</div>
   <div class="bi-count" id="bi-count">3</div>
+</div>
+
+<div id="shop-full">
+  <div class="sf-head">
+    <div class="sf-title">🛒 МАГАЗИН</div>
+    <div style="flex:1"></div>
+    <span class="sb-timer" id="shop-timer-full"></span>
+    <button class="sf-close" id="shop-full-close">✕</button>
+  </div>
+  <div class="sf-tabs" id="sf-tabs">
+    <button class="sf-tab" data-t="deals">🔥 Акции</button>
+    <button class="sf-tab" data-t="tanks">🚩 Техника</button>
+    <button class="sf-tab" data-t="containers">📦 Контейнеры</button>
+    <button class="sf-tab" data-t="mystic">🔮 Мистика</button>
+    <button class="sf-tab" data-t="gold">⭐ Золото</button>
+  </div>
+  <div class="sf-body" id="sf-body"></div>
+</div>
+<div id="depot-full">
+  <div class="sf-head">
+    <div class="sf-title">📦 ХРАНИЛИЩЕ</div>
+    <div style="flex:1"></div>
+    <button class="sf-close" id="depot-full-close">✕</button>
+  </div>
+  <div class="sf-tabs" id="df-tabs">
+    <button class="sf-tab" data-t="cont">📦 Контейнеры</button>
+    <button class="sf-tab" data-t="coll">🔮 Коллекция</button>
+    <button class="sf-tab" data-t="skins">🎨 Камуфляжи</button>
+    <button class="sf-tab" data-t="other">⚡ Прочее</button>
+  </div>
+  <div class="sf-body" id="df-body"></div>
+</div>
+<div id="mm-overlay">
+  <div class="mm-title" id="mm-title">ПОДБОР ПРОТИВНИКОВ</div>
+  <div class="mm-map" id="mm-map"></div>
+  <div class="mm-cols">
+    <div class="mm-col ally"><div class="mm-col-title">СОЮЗНИКИ</div><div id="mm-ally"></div></div>
+    <div class="mm-col enemy"><div class="mm-col-title">ПРОТИВНИКИ</div><div id="mm-enemy"></div></div>
+  </div>
+  <div class="mm-timer" id="mm-timer">0.0 с</div>
+  <div class="mm-found hidden" id="mm-found">БОЙ НАЙДЕН!</div>
 </div>
 
 <div id="cur-modal" class="hidden">
@@ -772,7 +878,8 @@ let score = 0, wave = 0, waveTimer = 0, enemiesToSpawn = 0, spawnTimer = 0;
 let shakeAmount = 0, boosterActive = false;
 let sniper = false;
 let battleCredits = 0, battleXp = 0, battleKills = 0;
-let groundMesh = null, snowPts = null;
+let groundMesh = null, snowPts = null, hangarSnow = null;
+let mmActive = false, shopTab = 'deals', depotTab = 'cont';
 let _trackGeo = null;
 let _battleEnv = null;
 let minimapCtx, hangar, sunLight, hemiLight;
@@ -1056,7 +1163,13 @@ function init() {
   }, { passive: true });
   addEventListener('contextmenu', e => e.preventDefault());
 
-  document.getElementById('btn-start').addEventListener('click', startGame);
+  document.getElementById('btn-start').addEventListener('click', startMatchmaking);
+  document.getElementById('btn-shop-top').addEventListener('click', () => openShopFull('deals'));
+  document.getElementById('btn-depot-top').addEventListener('click', () => openDepotFull('cont'));
+  document.getElementById('shop-full-close').addEventListener('click', () => document.getElementById('shop-full').classList.remove('open'));
+  document.getElementById('depot-full-close').addEventListener('click', () => document.getElementById('depot-full').classList.remove('open'));
+  for (const b of document.querySelectorAll('#sf-tabs .sf-tab')) b.addEventListener('click', () => openShopFull(b.dataset.t));
+  for (const b of document.querySelectorAll('#df-tabs .sf-tab')) b.addEventListener('click', () => openDepotFull(b.dataset.t));
   document.getElementById('btn-restart').addEventListener('click', startGame);
   document.getElementById('btn-garage').addEventListener('click', enterGarage);
   document.getElementById('btn-claim').addEventListener('click', () => {
@@ -1112,10 +1225,8 @@ function init() {
   });
   applySettings();
   document.getElementById('tab-tanks').addEventListener('click', () => toggleTab('tanks'));
-  document.getElementById('tab-shop').addEventListener('click', () => toggleTab('shop'));
   document.getElementById('tab-event').addEventListener('click', () => toggleTab('event'));
   document.getElementById('tab-deals').addEventListener('click', () => toggleTab('deals'));
-  document.getElementById('tab-storage').addEventListener('click', () => toggleTab('storage'));
 
   if (IS_TOUCH) {
     document.body.classList.add('touch');
@@ -1153,6 +1264,7 @@ function init() {
   const loadEl = document.getElementById('loading');
   loadEl.classList.add('done');
   setTimeout(() => { loadEl.style.display = 'none'; }, 700);
+  initLoadSlides();
   enterGarage();
   animate();
 }
@@ -2103,6 +2215,69 @@ function buildHangar() {
     h.add(crate);
   }
 
+  if (garage.eventOn !== false) {
+    const tx = -8.2, tz = -6.5;
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.38, 1.3, 8),
+      new THREE.MeshStandardMaterial({ color: 0x4a3320, roughness: 0.9 }));
+    trunk.position.set(tx, 0.95, tz);
+    trunk.castShadow = true;
+    h.add(trunk);
+    const treeMat = new THREE.MeshStandardMaterial({ color: 0x1d5a2e, roughness: 0.8 });
+    for (let i = 0; i < 4; i++) {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(2.2 - i * 0.44, 1.8, 12), treeMat);
+      cone.position.set(tx, 1.9 + i * 1.28, tz);
+      cone.castShadow = true;
+      h.add(cone);
+    }
+    const star = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd166 }));
+    star.position.set(tx, 7.3, tz);
+    h.add(star);
+    const bulbCols = [0xff4d4d, 0xffd166, 0x4da6ff, 0x7dff9e, 0xff7ddb];
+    for (let i = 0; i < 28; i++) {
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 5), new THREE.MeshBasicMaterial({ color: bulbCols[i % bulbCols.length] }));
+      const ang = i * 2.4, rad = 1.6 - (i % 4) * 0.34;
+      bulb.position.set(tx + Math.cos(ang) * rad, 1.7 + (i % 4) * 1.32 + Math.sin(i * 1.7) * 0.28, tz + Math.sin(ang) * rad);
+      h.add(bulb);
+    }
+    const giftCols = [0xc0392b, 0x2980b9, 0x27ae60, 0x8e44ad];
+    for (let i = 0; i < 8; i++) {
+      const a = rand(0, Math.PI * 2), d = rand(5.5, 9);
+      const gx = Math.cos(a) * d, gz = Math.sin(a) * d;
+      if (Math.hypot(gx - tx, gz - tz) < 3.2) continue;
+      const gw = rand(0.6, 1.1);
+      const gift = new THREE.Mesh(new THREE.BoxGeometry(gw, gw * 0.75, gw),
+        new THREE.MeshStandardMaterial({ color: giftCols[i % 4], roughness: 0.6 }));
+      gift.position.set(gx, gw * 0.375 + 0.3, gz);
+      gift.rotation.y = rand(0, Math.PI);
+      const rib = new THREE.Mesh(new THREE.BoxGeometry(gw * 1.03, gw * 0.78, gw * 0.16),
+        new THREE.MeshStandardMaterial({ color: 0xffd166, roughness: 0.4, metalness: 0.3 }));
+      gift.add(rib);
+      gift.castShadow = true;
+      h.add(gift);
+    }
+    for (let i = 0; i < 10; i++) {
+      const a = rand(0, Math.PI * 2), d = rand(6.5, 9);
+      const drift = new THREE.Mesh(new THREE.SphereGeometry(rand(0.8, 1.7), 10, 6),
+        new THREE.MeshStandardMaterial({ color: 0xe8edf3, roughness: 0.95 }));
+      drift.scale.y = 0.22;
+      drift.position.set(Math.cos(a) * d, 0.18, Math.sin(a) * d);
+      h.add(drift);
+    }
+    const NSH = 700;
+    const pos = new Float32Array(NSH * 3);
+    for (let i = 0; i < NSH; i++) {
+      const a = rand(0, Math.PI * 2), d = Math.sqrt(Math.random()) * 12;
+      pos[i * 3] = Math.cos(a) * d;
+      pos[i * 3 + 1] = rand(0.3, 13);
+      pos[i * 3 + 2] = Math.sin(a) * d;
+    }
+    const sg = new THREE.BufferGeometry();
+    sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    hangarSnow = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.09, transparent: true, opacity: 0.85, depthWrite: false }));
+    hangarSnow.frustumCulled = false;
+    h.add(hangarSnow);
+  }
+
   return h;
 }
 
@@ -2705,7 +2880,7 @@ function spawnAlly() {
 let currentTab = 'tanks';
 function switchTab(tab) {
   currentTab = tab;
-  for (const t of ['tanks', 'shop', 'deals', 'storage', 'tree', 'tasks', 'crew', 'settings', 'event']) {
+  for (const t of ['tanks', 'deals', 'tree', 'tasks', 'crew', 'settings', 'event']) {
     document.getElementById('tab-' + t).classList.toggle('active', tab === t);
     document.getElementById('panel-' + t).classList.toggle('active', tab === t);
   }
@@ -2718,12 +2893,13 @@ function switchTab(tab) {
 }
 function toggleTab(tab) { switchTab(currentTab === tab ? 'tanks' : tab); }
 setInterval(() => {
+  const end = new Date(); end.setHours(24, 0, 0, 0);
+  const ms = Math.max(0, end - Date.now());
+  const txt = '\u23f3 \u0434\u043e \u043a\u043e\u043d\u0446\u0430 \u0430\u043a\u0446\u0438\u0438: ' + Math.floor(ms / 3600000) + ' \u0447 ' + Math.floor(ms % 3600000 / 60000) + ' \u043c\u0438\u043d';
   const timerEl = document.getElementById('shop-timer');
-  if (timerEl && currentTab === 'shop') {
-    const end = new Date(); end.setHours(24, 0, 0, 0);
-    const ms = Math.max(0, end - Date.now());
-    timerEl.textContent = '\u23f3 \u0434\u043e \u043a\u043e\u043d\u0446\u0430 \u0430\u043a\u0446\u0438\u0438: ' + Math.floor(ms / 3600000) + ' \u0447 ' + Math.floor(ms % 3600000 / 60000) + ' \u043c\u0438\u043d';
-  }
+  if (timerEl && currentTab === 'shop') timerEl.textContent = txt;
+  const timerFull = document.getElementById('shop-timer-full');
+  if (timerFull && document.getElementById('shop-full').classList.contains('open')) timerFull.textContent = txt;
 }, 1000);
 
 function buyTank(id) {
@@ -3592,6 +3768,420 @@ function enterGarage() {
   scene.background = new THREE.Color(0x0b0f14);
   rebuildTankPreview();
   switchTab('tanks');
+}
+
+const MM_NICKS = ['Волков', 'Танкист_228', 'Железный', 'Медведь', 'Kolobok', 'Снайпер', 'Гром', 'Барс', 'Титан', 'Витязь', 'Сокол', 'Хищник', 'Молот', 'Рысь', 'Огнемёт', 'Иван'];
+function initLoadSlides() {
+  const el = document.getElementById('load-slides');
+  if (!el) return;
+  const srcs = [(window.COLL_IMG && window.COLL_IMG.winter) || '', (window.SHOP_IMG && window.SHOP_IMG.tiger) || '', (window.SHOP_IMG && window.SHOP_IMG.t34) || ''].filter(Boolean);
+  el.innerHTML = srcs.map(s => '<img src="' + s + '" alt="">').join('');
+}
+function startMatchmaking() {
+  if (mmActive || state !== 'garage') return;
+  if (!isOwnedId(garage.selected)) return;
+  mmActive = true;
+  const winter = garage.eventOn !== false;
+  const maps = winter ? ['Зимняя Ярмарка', 'Рудники', 'Эшелон'] : ['Рудники', 'Эшелон', 'Кастилья', 'Миттенгарден'];
+  document.getElementById('mm-map').textContent = 'Карта: «' + maps[Math.floor(Math.random() * maps.length)] + '» · 6×6';
+  document.getElementById('mm-found').classList.add('hidden');
+  let html = '';
+  for (let i = 0; i < 6; i++) html += '<div class="mm-slot empty" id="ms-a' + i + '"></div>';
+  document.getElementById('mm-ally').innerHTML = html;
+  html = '';
+  for (let i = 0; i < 6; i++) html += '<div class="mm-slot empty enemy" id="ms-e' + i + '"></div>';
+  document.getElementById('mm-enemy').innerHTML = html;
+  document.getElementById('mm-overlay').classList.add('open');
+  const t0 = performance.now();
+  const timerEl = document.getElementById('mm-timer');
+  const nickPool = MM_NICKS.slice().sort(() => Math.random() - 0.5);
+  const put = (side, idx) => {
+    const el = document.getElementById('ms-' + side + idx);
+    if (!el || !el.classList.contains('empty')) return;
+    if (side === 'a' && idx === 0) {
+      el.classList.remove('empty');
+      el.innerHTML = '<span class="dot"></span>' + (garage.nickname || 'Командир') + ' · ' + getTankCfg(garage.selected).name;
+      return;
+    }
+    if (Math.random() < 0.35) return;
+    el.classList.remove('empty');
+    el.innerHTML = '<span class="dot"></span>' + nickPool[Math.floor(Math.random() * nickPool.length)] + '-' + Math.floor(Math.random() * 99) +
+      ' · ' + TANKS[Math.floor(Math.random() * TANKS.length)].name;
+  };
+  const iv = setInterval(() => {
+    timerEl.textContent = ((performance.now() - t0) / 1000).toFixed(1) + ' с';
+    for (let i = 0; i < 6; i++) { put('a', i); put('e', i); }
+    let done = 0;
+    for (let i = 0; i < 6; i++) {
+      if (!document.getElementById('ms-a' + i).classList.contains('empty')) done++;
+      if (!document.getElementById('ms-e' + i).classList.contains('empty')) done++;
+    }
+    if (done === 12 || performance.now() - t0 > 6000) {
+      for (let i = 0; i < 6; i++) {
+        const a = document.getElementById('ms-a' + i), e = document.getElementById('ms-e' + i);
+        if (a.classList.contains('empty')) { a.classList.remove('empty'); a.innerHTML = '<span class="dot"></span>' + nickPool[i % nickPool.length] + ' · ' + TANKS[Math.floor(Math.random() * TANKS.length)].name; }
+        if (e.classList.contains('empty')) { e.classList.remove('empty'); e.innerHTML = '<span class="dot"></span>' + nickPool[(i + 5) % nickPool.length] + ' · ' + TANKS[Math.floor(Math.random() * TANKS.length)].name; }
+      }
+      clearInterval(iv);
+      document.getElementById('mm-found').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('mm-overlay').classList.remove('open');
+        mmActive = false;
+        if (state === 'garage') startGame();
+      }, 900);
+    }
+  }, 120);
+}
+function shopOffPct(cfg) {
+  const o = SHOP_OFFERS.find(x => x.tank === cfg.id);
+  if (o) return o.off;
+  return (cfg.id.length * 7 + cfg.tier * 3) % 25 + 5;
+}
+function shopPriceOf(cfg) {
+  if (!cfg.cost) return 0;
+  return Math.max(1, Math.round(cfg.cost * (1 - shopOffPct(cfg) / 100)));
+}
+function tankImgOf(cfg) {
+  const si = window.SHOP_IMG || {};
+  const o = SHOP_OFFERS.find(x => x.tank === cfg.id);
+  if (o && si[o.img]) return si[o.img];
+  const ct = COLLECT_TANKS.find(x => x.id === cfg.id);
+  if (ct && window.COLL_IMG && window.COLL_IMG[ct.img]) return window.COLL_IMG[ct.img];
+  const n = cfg.nation || 'СССР';
+  if (n === 'Германия') return si.tiger || '';
+  if (n === 'Китай') return si.type59 || '';
+  return si.t34 || '';
+}
+function shopTimerText() {
+  const end = new Date(); end.setHours(24, 0, 0, 0);
+  const ms = Math.max(0, end - Date.now());
+  return '⏳ до конца акции: ' + Math.floor(ms / 3600000) + ' ч ' + Math.floor(ms % 3600000 / 60000) + ' мин';
+}
+function openShopFull(tab) {
+  shopTab = tab || 'deals';
+  for (const b of document.querySelectorAll('#sf-tabs .sf-tab')) b.classList.toggle('active', b.dataset.t === shopTab);
+  document.getElementById('shop-full').classList.add('open');
+  renderShopFull();
+}
+function closeShopFull() { document.getElementById('shop-full').classList.remove('open'); }
+function openDepotFull(tab) {
+  depotTab = tab || 'cont';
+  for (const b of document.querySelectorAll('#df-tabs .sf-tab')) b.classList.toggle('active', b.dataset.t === depotTab);
+  document.getElementById('depot-full').classList.add('open');
+  renderDepotFull();
+}
+function closeDepotFull() { document.getElementById('depot-full').classList.remove('open'); }
+function shopTankCard(cfg, tag, reR) {
+  const owned = garage.unlocked.includes(cfg.id);
+  const price = shopPriceOf(cfg);
+  const prevT = prevTankOf(cfg);
+  const prevOk = !prevT || cfg.cost === 0 || garage.unlocked.includes(prevT.id);
+  const card = document.createElement('div');
+  card.className = 'sf-card' + (owned ? ' owned' : '');
+  card.innerHTML = (owned ? '<div class="off-badge" style="background:linear-gradient(90deg,#3fae5a,#2c8a45)">✓ В АНГАРЕ</div>' :
+      '<div class="off-badge">−' + shopOffPct(cfg) + '%</div>') +
+    (tag ? '<div class="tag-badge">' + tag + '</div>' : '') +
+    '<img alt="' + cfg.name + '" src="' + tankImgOf(cfg) + '">' +
+    '<div class="sc-body"><div class="sc-name">' + cfg.name + '</div>' +
+    '<div class="sc-sub">Ур. ' + cfg.tier + ' · ' + (cfg.cls || 'ЛТ') + ' · ' + (cfg.nation || 'СССР') + '</div>' +
+    '<div class="sc-price">' + (owned ? 'Куплено' : (cfg.cost === 0 ? 'Бесплатно' : '<s>⬤ ' + cfg.cost + '</s> ⬤ ' + price)) + '</div></div>';
+  if (!owned) {
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.textContent = !prevOk ? '🔒 Нужен «' + prevT.name + '»' :
+      (garage.credits >= price ? 'Купить за ⬤ ' + price : 'Не хватает ⬤ ' + (price - garage.credits));
+    btn.disabled = !prevOk || garage.credits < price;
+    btn.addEventListener('click', () => {
+      if (garage.credits < price) return;
+      garage.credits -= price;
+      garage.unlocked.push(cfg.id);
+      saveGarage();
+      playSound('hit');
+      reR();
+    });
+    card.appendChild(btn);
+  }
+  card.addEventListener('click', e => {
+    if (e.target.closest('button')) return;
+    if (isOwnedId(cfg.id)) {
+      garage.selected = cfg.id;
+      saveGarage();
+      rebuildTankPreview();
+      renderGarage();
+      closeShopFull();
+    }
+  });
+  return card;
+}
+function renderShopFull() {
+  const body = document.getElementById('sf-body');
+  if (!body) return;
+  body.innerHTML = '';
+  const reR = () => { renderShopFull(); renderGarage(); };
+  if (shopTab === 'deals') {
+    const bn = document.createElement('div');
+    bn.className = 'sf-banner';
+    bn.innerHTML = '<img src="' + ((window.COLL_IMG && window.COLL_IMG.mystic) || '') + '" alt="">' +
+      '<div class="sfb-t">⚡ ФЕСТИВАЛЬ СКИДОК</div>' +
+      '<div class="sfb-s">Скидки до −35% на легендарные танки · новый Мистический контейнер внутри</div>' +
+      '<span class="sb-timer" style="position:absolute;left:14px;bottom:10px;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 6px #000">' + shopTimerText() + '</span>';
+    body.appendChild(bn);
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    for (const o of SHOP_OFFERS) {
+      const cfg = getTankCfg(o.tank);
+      if (!cfg) continue;
+      grid.appendChild(shopTankCard(cfg, o.tag, reR));
+    }
+    body.appendChild(grid);
+    const secD = document.createElement('div');
+    secD.className = 'sf-sec';
+    secD.textContent = '🎁 НАБОРЫ И ПРЕДЛОЖЕНИЯ';
+    body.appendChild(secD);
+    const dg = document.createElement('div');
+    dg.className = 'sf-grid';
+    for (const d of DEALS) {
+      const owned = d.once && garage.dealsOwned.includes(d.id);
+      const card = document.createElement('div');
+      card.className = 'sf-card sf-wide';
+      card.innerHTML = '<div class="sc-body"><div class="sc-name">' + ico(d.icon) + ' ' + d.name + '</div>' +
+        '<div class="sc-sub">' + d.desc + '</div>' +
+        '<div class="sc-price">' + (owned ? 'Куплено ✓' : '⬤ ' + d.cost) + '</div></div>';
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      btn.textContent = owned ? 'Куплено ✓' : (garage.credits >= d.cost ? 'Купить' : 'Не хватает ⬤ ' + (d.cost - garage.credits));
+      btn.disabled = owned || garage.credits < d.cost;
+      btn.addEventListener('click', () => {
+        if (owned || garage.credits < d.cost) return;
+        garage.credits -= d.cost;
+        d.give();
+        if (d.once) garage.dealsOwned.push(d.id);
+        saveGarage();
+        playSound('hit');
+        reR();
+      });
+      card.appendChild(btn);
+      dg.appendChild(card);
+    }
+    body.appendChild(dg);
+  } else if (shopTab === 'tanks') {
+    const sec = document.createElement('div');
+    sec.className = 'sf-sec';
+    sec.textContent = '🛒 ТЕХНИКА · ' + TANKS.length + ' танков · скидки дня';
+    body.appendChild(sec);
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    for (const cfg of TANKS) grid.appendChild(shopTankCard(cfg, cfg.nation === 'Китай' ? 'НОВИНКА' : '', reR));
+    body.appendChild(grid);
+  } else if (shopTab === 'containers') {
+    const sec = document.createElement('div');
+    sec.className = 'sf-sec';
+    sec.textContent = '📦 КОНТЕЙНЕРЫ';
+    body.appendChild(sec);
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    for (const c of CONTAINERS) {
+      if (c.mystic) continue;
+      const chances = c.rolls.map(r => Math.round(r.chance * 100) + '% ' +
+        ({ credits: 'кредиты', skin: 'камуфляж', booster: 'бустер', gold: 'золото' })[r.type] || '').join(' · ');
+      const card = document.createElement('div');
+      card.className = 'sf-card sf-wide';
+      card.innerHTML = '<div class="sc-body"><div class="sc-name">' + ico(c.icon) + ' ' + c.name + '</div>' +
+        '<div class="sc-sub">' + c.desc + '</div>' +
+        '<div class="sc-sub" style="color:#7f95a8">Шансы: ' + chances + '</div>' +
+        '<div class="sc-price">⬤ ' + c.cost + '</div></div>';
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      btn.textContent = 'Открыть';
+      btn.disabled = garage.credits < c.cost;
+      btn.addEventListener('click', () => { openContainer(c); reR(); });
+      card.appendChild(btn);
+      grid.appendChild(card);
+    }
+    body.appendChild(grid);
+  } else if (shopTab === 'mystic') {
+    const mc = CONTAINERS.find(x => x.mystic);
+    const big = document.createElement('div');
+    big.className = 'sf-card sf-wide';
+    big.innerHTML = '<img alt="Мистический контейнер" src="' + ((window.COLL_IMG && window.COLL_IMG.mystic) || '') + '">' +
+      '<div class="sc-body"><div class="sc-name">🔮 МИСТИЧЕСКИЙ КОНТЕЙНЕР</div>' +
+      '<div class="sc-sub">' + mc.desc + '</div>' +
+      '<div class="sc-price">⬤ ' + mc.cost + '</div></div>';
+    const mBtn = document.createElement('button');
+    mBtn.className = 'btn small';
+    mBtn.textContent = 'Открыть';
+    mBtn.disabled = garage.credits < mc.cost;
+    mBtn.addEventListener('click', () => { openContainer(mc); reR(); });
+    big.appendChild(mBtn);
+    body.appendChild(big);
+    const sec = document.createElement('div');
+    sec.className = 'sf-sec';
+    sec.textContent = '🔮 КОЛЛЕКЦИОННЫЕ ТАНКИ · нельзя купить';
+    body.appendChild(sec);
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    for (const t of COLLECT_TANKS) {
+      const owned = isOwnedId(t.id);
+      const card = document.createElement('div');
+      card.className = 'sf-card' + (owned ? ' owned' : '');
+      card.innerHTML = '<div class="coll-badge">КОЛЛЕКЦИЯ</div>' +
+        '<img alt="' + t.name + '" src="' + ((window.COLL_IMG && window.COLL_IMG[t.img]) || '') + '" style="opacity:' + (owned ? '1' : '.55') + '">' +
+        '<div class="sc-body"><div class="sc-name">' + t.name + '</div>' +
+        '<div class="sc-sub">Ур. ' + t.tier + ' · ' + t.bonusText + '</div>' +
+        '<div class="sc-price">' + (owned ? 'В ангаре ✓' : 'Не получен 🔮') + '</div></div>';
+      grid.appendChild(card);
+    }
+    body.appendChild(grid);
+  } else if (shopTab === 'gold') {
+    const sec = document.createElement('div');
+    sec.className = 'sf-sec';
+    sec.textContent = '⭐ ЗОЛОТО · ОБМЕН И БУСТЕРЫ · у тебя ' + (garage.gold || 0) + ' ⭐';
+    body.appendChild(sec);
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    const mkCard = (name, sub, priceTxt, enabled, act) => {
+      const card = document.createElement('div');
+      card.className = 'sf-card sf-wide';
+      card.innerHTML = '<div class="sc-body"><div class="sc-name">' + name + '</div>' +
+        '<div class="sc-sub">' + sub + '</div>' +
+        '<div class="sc-price">' + priceTxt + '</div></div>';
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      btn.textContent = 'Обменять';
+      btn.disabled = !enabled;
+      btn.addEventListener('click', act);
+      card.appendChild(btn);
+      grid.appendChild(card);
+    };
+    for (const e of [{ g: 5, cr: 2000 }, { g: 10, cr: 4000 }]) {
+      mkCard('⭐ ' + e.g + ' → ⬤ ' + e.cr, 'Обмен золота на кредиты. Золото даётся за волны и из Элитных контейнеров.',
+        (garage.gold || 0) >= e.g ? '' : 'Не хватает ⭐', (garage.gold || 0) >= e.g,
+        () => { if ((garage.gold || 0) < e.g) return; garage.gold -= e.g; garage.credits += e.cr; saveGarage(); playSound('hit'); reR(); });
+    }
+    for (const g of [1, 5, 10]) {
+      mkCard('⭐ ' + g + ' → ✦ ' + (g * 25), 'Обмен золота на свободный опыт для прокачки танков.',
+        (garage.gold || 0) >= g ? '' : 'Не хватает ⭐', (garage.gold || 0) >= g,
+        () => { if ((garage.gold || 0) < g) return; garage.gold -= g; garage.freeXp = (garage.freeXp || 0) + g * 25; saveGarage(); playSound('hit'); reR(); });
+    }
+    mkCard('⚡ Бустер ×2', 'Кредиты ×2 в следующем бою. Сразу в хранилище.', '⬤ 800', garage.credits >= 800,
+      () => { if (garage.credits < 800) return; garage.credits -= 800; garage.booster = (garage.booster || 0) + 1; saveGarage(); playSound('hit'); reR(); });
+    body.appendChild(grid);
+  }
+}
+function renderDepotFull() {
+  const body = document.getElementById('df-body');
+  if (!body) return;
+  body.innerHTML = '';
+  const reR = () => { renderDepotFull(); renderGarage(); };
+  const note = txt => {
+    const n = document.createElement('div');
+    n.className = 'sf-note';
+    n.textContent = txt;
+    body.appendChild(n);
+  };
+  const sec = txt => {
+    const s = document.createElement('div');
+    s.className = 'sf-sec';
+    s.textContent = txt;
+    body.appendChild(s);
+  };
+  if (depotTab === 'cont') {
+    sec('📦 КОНТЕЙНЕРЫ В ХРАНИЛИЩЕ');
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    let any = false;
+    for (const c of CONTAINERS) {
+      const count = garage.containers[c.id] || 0;
+      if (!count) continue;
+      any = true;
+      const card = document.createElement('div');
+      card.className = 'sf-card sf-wide';
+      card.innerHTML = '<div class="sc-body"><div class="sc-name">' + ico(c.icon) + ' ' + c.name + ' ×' + count + '</div>' +
+        '<div class="sc-sub">' + c.desc + '</div>' +
+        '<div class="sc-price">Откроется бесплатно</div></div>';
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      btn.textContent = 'Открыть';
+      btn.addEventListener('click', () => { openContainer(c, true); reR(); });
+      card.appendChild(btn);
+      grid.appendChild(card);
+    }
+    body.appendChild(grid);
+    if (!any) note('Хранилище пусто. Играй, открывай контейнеры и покупай наборы — всё лишнее окажется здесь.');
+  } else if (depotTab === 'coll') {
+    sec('🔮 КОЛЛЕКЦИОННЫЕ ТАНКИ');
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    for (const t of COLLECT_TANKS) {
+      const owned = isOwnedId(t.id);
+      const card = document.createElement('div');
+      card.className = 'sf-card' + (owned ? ' owned' : '');
+      card.innerHTML = '<div class="coll-badge">КОЛЛЕКЦИЯ</div>' +
+        '<img alt="' + t.name + '" src="' + ((window.COLL_IMG && window.COLL_IMG[t.img]) || '') + '" style="opacity:' + (owned ? '1' : '.5') + '">' +
+        '<div class="sc-body"><div class="sc-name">' + t.name + '</div>' +
+        '<div class="sc-sub">Ур. ' + t.tier + ' · ' + t.bonusText + '</div>' +
+        '<div class="sc-price">' + (owned ? 'В ангаре ✓' : 'Не получен 🔮') + '</div></div>';
+      grid.appendChild(card);
+    }
+    body.appendChild(grid);
+    note('Коллекционные танки нельзя купить — только выбить из Мистического контейнера.');
+  } else if (depotTab === 'skins') {
+    sec('🎨 КАМУФЛЯЖИ · для ' + getTankCfg(garage.selected).name);
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    for (const sid of garage.skinsOwned) {
+      const s = SKINS.find(x => x.id === sid);
+      if (!s) continue;
+      const equipped = garage.equipped[garage.selected] === s.id;
+      const card = document.createElement('div');
+      card.className = 'sf-card' + (equipped ? ' owned' : '');
+      card.innerHTML = '<img alt="' + s.name + '" style="height:64px;background:#' + s.color.toString(16).padStart(6, '0') + ';object-fit:cover">' +
+        '<div class="sc-body"><div class="sc-name">' + s.name + '</div>' +
+        '<div class="sc-sub">' + ({ common: 'Обычный', rare: 'Редкий', epic: 'Эпический' })[s.rarity] + '</div></div>';
+      const btn = document.createElement('button');
+      btn.className = 'btn small secondary';
+      btn.textContent = equipped ? 'Снять' : 'Надеть';
+      btn.addEventListener('click', () => {
+        if (garage.equipped[garage.selected] === s.id) delete garage.equipped[garage.selected];
+        else garage.equipped[garage.selected] = s.id;
+        saveGarage();
+        rebuildTankPreview();
+        reR();
+      });
+      card.appendChild(btn);
+      grid.appendChild(card);
+    }
+    body.appendChild(grid);
+    if (!garage.skinsOwned.length) note('Камуфляжей пока нет — выбивай их из контейнеров.');
+  } else {
+    sec('⚡ ПРОЧЕЕ');
+    const grid = document.createElement('div');
+    grid.className = 'sf-grid';
+    if (garage.booster > 0) {
+      const b = document.createElement('div');
+      b.className = 'sf-card sf-wide';
+      b.innerHTML = '<div class="sc-body"><div class="sc-name">⚡ Бустер ×2</div>' +
+        '<div class="sc-sub">Кредиты ×2 в следующем бою.</div>' +
+        '<div class="sc-price">Зарядов: ' + garage.booster + '</div></div>';
+      grid.appendChild(b);
+    }
+    if (garage.fairTickets > 0) {
+      const f = document.createElement('div');
+      f.className = 'sf-card sf-wide';
+      f.innerHTML = '<div class="sc-body"><div class="sc-name">🎟 Билеты Ярмарки: ' + garage.fairTickets + '</div>' +
+        '<div class="sc-sub">Меняй билеты на Снежные шары во вкладке Ярмарка.</div></div>';
+      grid.appendChild(f);
+    }
+    if (garage.charms > 0) {
+      const ch = document.createElement('div');
+      ch.className = 'sf-card sf-wide';
+      ch.innerHTML = '<div class="sc-body"><div class="sc-name">🧿 Шармы: ' + garage.charms + '</div>' +
+        '<div class="sc-sub">10 Шармов обмениваются на коллекционный танк во вкладке Ярмарка.</div></div>';
+      grid.appendChild(ch);
+    }
+    body.appendChild(grid);
+    if (!garage.booster && !garage.fairTickets && !garage.charms) note('Здесь появятся бустеры, билеты Ярмарки и Шармы.');
+  }
 }
 
 function startGame() {
@@ -4518,6 +5108,16 @@ function drawMinimap() {
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
+
+  if (state === 'garage' && hangarSnow) {
+    const pa = hangarSnow.geometry.attributes.position;
+    for (let i = 0; i < pa.count; i++) {
+      let y = pa.getY(i) - dt * 2.2;
+      if (y < 0.3) y = 13;
+      pa.setY(i, y);
+    }
+    pa.needsUpdate = true;
+  }
 
   if (state === 'playing') {
     const pp = player.group.position;
